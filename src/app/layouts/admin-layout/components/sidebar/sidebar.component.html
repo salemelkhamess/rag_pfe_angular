@@ -1,0 +1,25 @@
+<aside class="sidebar" [class.collapsed]="isSidebarCollapsed" [class.mobile-open]="isMobileOpen">
+  <div class="sidebar-header">
+    <div class="logo-container">
+      <span class="logo-icon">📚</span>
+      <span class="logo-text" *ngIf="!isSidebarCollapsed">RAG Admin</span>
+    </div>
+    <button class="toggle-btn" (click)="toggleSidebar()">
+      {{ isSidebarCollapsed ? '→' : '←' }}
+    </button>
+  </div>
+
+  <nav class="sidebar-nav">
+    <ul class="nav-list">
+      <li *ngFor="let item of menuItems" class="nav-item">
+        <a [routerLink]="item.path" routerLinkActive="active" class="nav-link" (click)="closeOnMobile()">
+          <span class="nav-icon">{{ item.icon }}</span>
+          <span class="nav-label" *ngIf="!isSidebarCollapsed">{{ item.label }}</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+</aside>
+
+<!-- Overlay pour mobile -->
+<div class="sidebar-overlay" *ngIf="isMobileOpen" (click)="closeMobile()"></div>

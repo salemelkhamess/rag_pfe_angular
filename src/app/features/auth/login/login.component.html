@@ -1,0 +1,86 @@
+<div class="login-container">
+  <div class="login-card">
+    <div class="login-header">
+      <div class="logo">
+        <img src="assets/logo.svg" alt="Logo" class="logo-img">
+      </div>
+      <h1>Welcome Back</h1>
+      <p>Sign in to continue to your dashboard</p>
+    </div>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+      <!-- Email/Username Field -->
+      <div class="form-group">
+        <label for="identifier">Email or Username</label>
+        <div class="input-group">
+          <span class="input-icon">
+            <i class="fas fa-envelope"></i>
+          </span>
+          <input
+            type="text"
+            id="identifier"
+            formControlName="identifier"
+            placeholder="Enter your email or username"
+            [class.is-invalid]="f['identifier'].invalid && f['identifier'].touched"
+          >
+        </div>
+        <div class="error-message" *ngIf="f['identifier'].invalid && f['identifier'].touched">
+          <span *ngIf="f['identifier'].errors?.['required']">Email is required</span>
+          <span *ngIf="f['identifier'].errors?.['email']">Please enter a valid email</span>
+        </div>
+      </div>
+
+      <!-- Password Field -->
+      <div class="form-group">
+        <label for="password">Password</label>
+        <div class="input-group">
+          <span class="input-icon">
+            <i class="fas fa-lock"></i>
+          </span>
+          <input
+            [type]="showPassword ? 'text' : 'password'"
+            id="password"
+            formControlName="password"
+            placeholder="Enter your password"
+            [class.is-invalid]="f['password'].invalid && f['password'].touched"
+          >
+          <button type="button" class="password-toggle" (click)="togglePasswordVisibility()">
+            <i [class]="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+          </button>
+        </div>
+        <div class="error-message" *ngIf="f['password'].invalid && f['password'].touched">
+          <span *ngIf="f['password'].errors?.['required']">Password is required</span>
+          <span *ngIf="f['password'].errors?.['minlength']">Password must be at least 6 characters</span>
+        </div>
+      </div>
+
+      <!-- Remember Me & Forgot Password -->
+      <div class="form-options">
+        <label class="checkbox-label">
+          <input type="checkbox" formControlName="rememberMe">
+          <span class="checkbox-text">Remember me</span>
+        </label>
+        <a href="#" class="forgot-password">Forgot Password?</a>
+      </div>
+
+      <!-- Error Message -->
+      <div class="alert alert-error" *ngIf="errorMessage">
+        <i class="fas fa-exclamation-circle"></i>
+        {{ errorMessage }}
+      </div>
+
+      <!-- Submit Button -->
+      <button type="submit" class="btn-login" [disabled]="isLoading">
+        <span *ngIf="!isLoading">Sign In</span>
+        <span *ngIf="isLoading" class="spinner">
+          <i class="fas fa-spinner fa-spin"></i> Signing in...
+        </span>
+      </button>
+
+      <!-- Register Link -->
+      <div class="register-link">
+        <p>Don't have an account? <a routerLink="/register">Create Account</a></p>
+      </div>
+    </form>
+  </div>
+</div>

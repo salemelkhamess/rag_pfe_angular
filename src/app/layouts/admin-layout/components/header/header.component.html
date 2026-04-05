@@ -1,0 +1,60 @@
+<header class="header">
+  <div class="header-left">
+    <button class="menu-toggle" (click)="onMenuToggle()">
+      ☰
+    </button>
+    <h1 class="page-title">Tableau de bord</h1>
+  </div>
+
+  <div class="header-right">
+    <div class="notification-dropdown">
+      <button class="icon-btn" (click)="toggleNotifications()">
+        🔔
+        <span class="badge">{{ notifications.length }}</span>
+      </button>
+
+      <div class="dropdown-menu" *ngIf="showNotifications">
+        <div class="dropdown-header">
+          <h3>Notifications</h3>
+          <button class="mark-all">Tout marquer comme lu</button>
+        </div>
+        <div class="dropdown-content">
+          <div *ngFor="let notif of notifications" class="notification-item">
+            <div class="notification-message">{{ notif.message }}</div>
+            <div class="notification-time">{{ notif.time }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="user-dropdown">
+      <button class="user-btn" (click)="toggleUserMenu()" [disabled]="isLoading">
+        <span class="user-avatar">{{ user.avatar }}</span>
+        <span class="user-name">{{ user.name }}</span>
+        <span class="dropdown-arrow">▼</span>
+      </button>
+
+      <div class="dropdown-menu" *ngIf="showUserMenu">
+        <div class="user-info">
+          <div class="user-avatar-large">{{ user.avatar }}</div>
+          <div class="user-details">
+            <div class="user-name-large">{{ user.name }}</div>
+            <div class="user-email">{{ user.email }}</div>
+          </div>
+        </div>
+        <div class="dropdown-divider"></div>
+        <a href="javascript:void(0)" class="dropdown-item" (click)="goToProfile()">
+          👤 Mon profil
+        </a>
+        <a href="javascript:void(0)" class="dropdown-item" (click)="goToSettings()">
+          ⚙️ Paramètres
+        </a>
+        <div class="dropdown-divider"></div>
+        <a href="javascript:void(0)" class="dropdown-item logout-item" (click)="logout()">
+          <span *ngIf="!isLoading">🚪 Déconnexion</span>
+          <span *ngIf="isLoading" class="spinner">⏳ Déconnexion...</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</header>
