@@ -445,3 +445,11 @@
 .action-btn.delete:hover {
   background: #c82333;
 }
+
+/* document-list.component.css */
+.meta-item.category {
+  background: #f0f7ff;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  color: #007bff;
+}

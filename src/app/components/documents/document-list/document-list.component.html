@@ -82,6 +82,12 @@
             <span class="meta-icon">📊</span>
             <span>{{ formatFileSize(doc.size) }}</span>
           </div>
+          @if (doc.categoryName) {
+            <div class="meta-item category">
+              <span class="meta-icon">🏷️</span>
+              <span>{{ doc.categoryName }}</span>
+            </div>
+          }
         </div>
       </div>
 

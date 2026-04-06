@@ -43,6 +43,18 @@
 
   <!-- Formulaire (désactivé pendant l'upload) -->
   @if (selectedFile && !isUploading) {
+    <div class="form-group">
+      <label>Category</label>
+      <select [(ngModel)]="selectedCategoryId" class="form-control">
+        <option [value]="null">No category</option>
+        @for (cat of categories(); track cat.id) {
+          <option [value]="cat.id">
+            {{ '—'.repeat(cat.level) }} {{ cat.name }}
+          </option>
+        }
+      </select>
+    </div>
+
     <div class="upload-form">
       <div class="form-group">
         <label>Document Name *</label>

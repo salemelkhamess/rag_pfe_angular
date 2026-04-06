@@ -12,6 +12,8 @@ import { RouterModule } from '@angular/router';
 export class SidebarComponent {
   menuItems = [
     { path: '/dashboard', icon: '🏠', label: 'Tableau de bord' },
+    { path: '/categories', icon: '📄', label: 'Catégories documents' },
+
     { path: '/documents', icon: '📄', label: 'Documents' },
     { path: '/chat', icon: '💬', label: 'Chat RAG' },
     { path: '/users', icon: '👥', label: 'Utilisateurs' },

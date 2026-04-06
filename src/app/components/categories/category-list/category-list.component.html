@@ -1,0 +1,153 @@
+<!-- src/app/components/categories/category-list/category-list.component.html -->
+<div class="categories-container">
+  <div class="header">
+    <div>
+      <h2>📂 Categories</h2>
+      <p class="subtitle">Manage your document categories</p>
+    </div>
+    <div class="header-actions">
+      <a routerLink="/categories/create" class="btn-create">
+        <span>➕</span> Create Category
+      </a>
+    </div>
+  </div>
+
+  <!-- Search Bar -->
+  <div class="search-bar">
+    <div class="search-input-wrapper">
+      <span class="search-icon">🔍</span>
+      <input type="text"
+             placeholder="Search categories..."
+             [(ngModel)]="searchTerm"
+             class="search-input">
+    </div>
+  </div>
+
+  <!-- Loading -->
+  @if (loading()) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading categories...</p>
+    </div>
+  }
+
+  <!-- Empty state -->
+  @if (!loading() && rootCategories().length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">📭</div>
+      <h3>No categories yet</h3>
+      <p>Create your first category to organize documents</p>
+      <a routerLink="/categories/create" class="empty-create-btn">
+        ➕ Create Category
+      </a>
+    </div>
+  }
+
+  <!-- Categories Tree -->
+  @if (!loading() && rootCategories().length > 0) {
+    <div class="categories-tree">
+      @for (category of rootCategories(); track category.id) {
+        <div class="category-item" [style.marginLeft]="getLevelSpacing(category.level)">
+          <div class="category-row">
+            <div class="category-expand" (click)="toggleExpand(category.id)">
+              @if (getChildren(category.id).length > 0) {
+                <span class="expand-icon">{{ isExpanded(category.id) ? '▼' : '▶' }}</span>
+              } @else {
+                <span class="expand-icon-placeholder"></span>
+              }
+            </div>
+            <div class="category-icon" [style.backgroundColor]="category.color">
+              {{ category.icon || '📁' }}
+            </div>
+            <div class="category-info">
+              <div class="category-name">{{ category.name }}</div>
+              <div class="category-description">{{ category.description || 'No description' }}</div>
+            </div>
+            <div class="category-status">
+              <span class="status-badge" [class]="getStatusClass(category.active)">
+                {{ getStatusText(category.active) }}
+              </span>
+            </div>
+            <div class="category-actions">
+              <a [routerLink]="['/categories/edit', category.id]" class="action-btn edit" title="Edit">
+                ✏️
+              </a>
+              <button class="action-btn delete" (click)="confirmDelete(category)" title="Delete">
+                🗑️
+              </button>
+            </div>
+          </div>
+
+          <!-- Children -->
+          @if (isExpanded(category.id) && getChildren(category.id).length > 0) {
+            <div class="category-children">
+              @for (child of getChildren(category.id); track child.id) {
+                <div class="category-item" [style.marginLeft]="getLevelSpacing(child.level)">
+                  <div class="category-row">
+                    <div class="category-expand">
+                      @if (getChildren(child.id).length > 0) {
+                        <span class="expand-icon" (click)="toggleExpand(child.id)">
+                          {{ isExpanded(child.id) ? '▼' : '▶' }}
+                        </span>
+                      } @else {
+                        <span class="expand-icon-placeholder"></span>
+                      }
+                    </div>
+                    <div class="category-icon" [style.backgroundColor]="child.color">
+                      {{ child.icon || '📄' }}
+                    </div>
+                    <div class="category-info">
+                      <div class="category-name">{{ child.name }}</div>
+                      <div class="category-description">{{ child.description || 'No description' }}</div>
+                    </div>
+                    <div class="category-status">
+                      <span class="status-badge" [class]="getStatusClass(child.active)">
+                        {{ getStatusText(child.active) }}
+                      </span>
+                    </div>
+                    <div class="category-actions">
+                      <a [routerLink]="['/categories/edit', child.id]" class="action-btn edit" title="Edit">
+                        ✏️
+                      </a>
+                      <button class="action-btn delete" (click)="confirmDelete(child)" title="Delete">
+                        🗑️
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Delete Modal -->
+  @if (showDeleteModal()) {
+    <div class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Confirm Delete</h3>
+          <button class="close-btn" (click)="cancelDelete()">✕</button>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to delete <strong>"{{ selectedCategory()?.name }}"</strong>?</p>
+          @if (getChildren(selectedCategory()?.id || '').length > 0) {
+            <p class="warning-text">⚠️ This category has sub-categories. Delete them first.</p>
+          } @else {
+            <p class="warning-text">This action cannot be undone.</p>
+          }
+        </div>
+        <div class="modal-footer">
+          <button class="btn-cancel" (click)="cancelDelete()">Cancel</button>
+          <button class="btn-confirm"
+                  (click)="deleteCategory()"
+                  [disabled]="getChildren(selectedCategory()?.id || '').length > 0">
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

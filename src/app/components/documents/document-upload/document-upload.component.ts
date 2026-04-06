@@ -1,11 +1,12 @@
 // document-upload.component.ts
-import { Component, OnDestroy } from '@angular/core';
+import {Component, OnDestroy, OnInit, signal} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Subject, Subscription } from 'rxjs';
 import { finalize, takeUntil } from 'rxjs/operators';
 import { DocumentService } from '../../../core/services/document.service';
+import {Category, CategoryService} from '../../../core/services/category.service';
 
 @Component({
   selector: 'app-document-upload',
@@ -14,7 +15,7 @@ import { DocumentService } from '../../../core/services/document.service';
   templateUrl: './document-upload.component.html',
   styleUrls: ['./document-upload.component.css']
 })
-export class DocumentUploadComponent implements OnDestroy {
+export class DocumentUploadComponent implements OnDestroy,OnInit {
   selectedFile: File | null = null;
   documentName = '';
   description = '';
@@ -28,10 +29,19 @@ export class DocumentUploadComponent implements OnDestroy {
   private uploadSubscription: Subscription | null = null;
   private progressInterval: number | null = null;  // Changé: number au lieu de NodeJS.Timeout
 
+  categories = signal<Category[]>([]);
+  selectedCategoryId = signal<string | null>(null);
+
+
   constructor(
     private documentService: DocumentService,
+    private categoryService : CategoryService,
     private router: Router
   ) {}
+
+  ngOnInit(): void {
+    this.loadCategories()
+    }
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -58,6 +68,19 @@ export class DocumentUploadComponent implements OnDestroy {
       this.handleFile(files[0]);
     }
   }
+
+  loadCategories(): void {
+    this.categoryService.getAllCategories().subscribe({
+      next: (data) => {
+        this.categories.set(data);
+      },
+      error: (error) => {
+        console.error('Error loading categories:', error);
+      }
+    });
+  }
+
+
 
   private handleFile(file: File): void {
     if (file.size > 100 * 1024 * 1024) {
@@ -94,7 +117,7 @@ export class DocumentUploadComponent implements OnDestroy {
     this.startProgressSimulation();
 
     this.uploadSubscription = this.documentService
-      .uploadDocument(this.selectedFile, this.documentName, this.description, this.documentType)
+      .uploadDocument(this.selectedFile, this.documentName, this.description, this.documentType, this.selectedCategoryId() || undefined)
       .pipe(
         finalize(() => {
           this.stopProgressSimulation();

@@ -35,7 +35,11 @@ export const routes: Routes = [
         path: 'documents/upload',
         loadComponent: () =>
           import('./components/documents/document-upload/document-upload.component').then((m) => m.DocumentUploadComponent),
-      }
+      },
+      // Categories routes
+      { path: 'categories', loadComponent: () => import('./components/categories/category-list/category-list.component').then(m => m.CategoryListComponent) },
+      { path: 'categories/create', loadComponent: () => import('./components/categories/category-form/category-form.component').then(m => m.CategoryFormComponent) },
+      { path: 'categories/edit/:id', loadComponent: () => import('./components/categories/category-form/category-form.component').then(m => m.CategoryFormComponent) },
     ]
   },
   {
