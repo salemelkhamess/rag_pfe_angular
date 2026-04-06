@@ -24,6 +24,17 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./components/dashbord-component/dashbord-component').then((m) => m.DashbordComponent),
         canActivate: [AdminGuard]
+      },
+
+      {
+        path: 'documents',
+        loadComponent: () =>
+          import('./components/documents/document-list/document-list.component').then((m) => m.DocumentListComponent),
+      },
+      {
+        path: 'documents/upload',
+        loadComponent: () =>
+          import('./components/documents/document-upload/document-upload.component').then((m) => m.DocumentUploadComponent),
       }
     ]
   },

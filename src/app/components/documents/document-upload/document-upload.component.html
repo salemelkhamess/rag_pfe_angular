@@ -1,0 +1,126 @@
+<!-- src/app/components/documents/document-upload/document-upload.component.html -->
+<div class="upload-container">
+  <div class="upload-header">
+    <h2>📄 Upload Document</h2>
+    <p>Upload your documents to start processing</p>
+  </div>
+
+  <!-- Zone de drop (désactivée pendant l'upload) -->
+  <div class="drop-zone"
+       [class.drag-over]="isDragging && !isUploading"
+       [class.disabled]="isUploading"
+       (dragover)="!isUploading && onDragOver($event)"
+       (dragleave)="!isUploading && onDragLeave($event)"
+       (drop)="!isUploading && onDrop($event)">
+    <div class="drop-zone-content">
+      <div class="upload-icon">📁</div>
+      <p>Drag & drop your file here</p>
+      <span>or</span>
+      <label class="browse-btn" [class.disabled]="isUploading">
+        Browse Files
+        <input type="file" (change)="!isUploading && onFileSelected($event)"
+               accept=".txt,.pdf,.docx,.xlsx,.jpg,.png"
+               [disabled]="isUploading"
+               hidden>
+      </label>
+      <p class="file-hint">Supported formats: TXT, PDF, DOCX, XLSX, JPG, PNG (Max 100MB)</p>
+    </div>
+  </div>
+
+  <!-- Fichier sélectionné -->
+  @if (selectedFile && !isUploading) {
+    <div class="selected-file">
+      <div class="file-info">
+        <span class="file-icon">📄</span>
+        <div class="file-details">
+          <strong>{{ selectedFile.name }}</strong>
+          <small>{{ (selectedFile.size / 1024).toFixed(2) }} KB</small>
+        </div>
+        <button class="remove-file" (click)="resetForm()">✕</button>
+      </div>
+    </div>
+  }
+
+  <!-- Formulaire (désactivé pendant l'upload) -->
+  @if (selectedFile && !isUploading) {
+    <div class="upload-form">
+      <div class="form-group">
+        <label>Document Name *</label>
+        <input type="text"
+               [(ngModel)]="documentName"
+               placeholder="Enter document name"
+               class="form-control">
+      </div>
+
+      <div class="form-group">
+        <label>Description</label>
+        <textarea [(ngModel)]="description"
+                  rows="3"
+                  placeholder="Enter a description (optional)"
+                  class="form-control"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Document Type</label>
+        <select [(ngModel)]="documentType" class="form-control">
+          <option value="TXT">📄 Text File (TXT)</option>
+          <option value="PDF">📕 PDF Document</option>
+          <option value="DOCX">📘 Word Document</option>
+          <option value="XLSX">📊 Excel Spreadsheet</option>
+          <option value="IMAGE">🖼️ Image File</option>
+        </select>
+      </div>
+
+      <button (click)="upload()"
+              [disabled]="!selectedFile || !documentName"
+              class="btn-upload">
+        <span>🚀</span> Upload Document
+      </button>
+    </div>
+  }
+
+  <!-- État Upload en cours -->
+  @if (isUploading) {
+    <div class="uploading-state">
+      <div class="uploading-header">
+        <div class="spinner"></div>
+        <h3>Uploading...</h3>
+      </div>
+
+      <!-- Barre de progression -->
+      <div class="progress-container">
+        <div class="progress-bar" [style.width.%]="uploadProgress">
+          <span class="progress-text">{{ uploadProgress }}%</span>
+        </div>
+      </div>
+
+      <p class="uploading-info">Please wait while your document is being uploaded</p>
+
+      <button class="btn-cancel-upload" (click)="cancelUpload()">
+        Cancel Upload
+      </button>
+    </div>
+  }
+
+  <!-- Succès -->
+  @if (uploadSuccess && !isUploading) {
+    <div class="alert success">
+      <span>✅</span>
+      <div>
+        <strong>Document uploaded successfully!</strong>
+        <p>Redirecting to documents list...</p>
+      </div>
+    </div>
+  }
+
+  <!-- Erreur -->
+  @if (uploadError && !isUploading) {
+    <div class="alert error">
+      <span>❌</span>
+      <div>
+        <strong>Upload failed</strong>
+        <p>{{ uploadError }}</p>
+      </div>
+    </div>
+  }
+</div>

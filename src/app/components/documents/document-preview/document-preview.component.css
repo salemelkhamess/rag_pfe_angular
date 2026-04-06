@@ -1,0 +1,254 @@
+/* src/app/components/documents/document-preview/document-preview.component.css */
+
+.preview-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+}
+
+.preview-container {
+  width: min(1200px, 95vw);
+  height: min(90vh, 900px);
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+}
+
+.preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #fafafa;
+}
+
+.preview-title {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.file-icon {
+  font-size: 28px;
+}
+
+.preview-title h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #111827;
+  word-break: break-word;
+}
+
+.preview-title p {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.preview-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.action-btn {
+  border: none;
+  border-radius: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.action-btn.download {
+  background: #2563eb;
+  color: #fff;
+}
+
+.action-btn.close {
+  background: #ef4444;
+  color: #fff;
+}
+
+.preview-body {
+  flex: 1;
+  overflow: auto;
+  background: #f9fafb;
+  position: relative;
+}
+
+.preview-loading,
+.preview-error {
+  height: 100%;
+  min-height: 320px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  color: #374151;
+  padding: 24px;
+  text-align: center;
+}
+
+.spinner {
+  width: 46px;
+  height: 46px;
+  border: 4px solid #dbeafe;
+  border-top: 4px solid #2563eb;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.error-icon {
+  font-size: 42px;
+  margin-bottom: 12px;
+}
+
+.btn-download {
+  margin-top: 16px;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 18px;
+  background: #2563eb;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.preview-image {
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.preview-image img {
+  max-width: 100%;
+  max-height: 75vh;
+  border-radius: 10px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+.preview-pdf {
+  width: 100%;
+  height: 100%;
+  min-height: 75vh;
+}
+
+.preview-pdf iframe {
+  border: none;
+  width: 100%;
+  height: 100%;
+  min-height: 75vh;
+  background: white;
+}
+
+.preview-text {
+  padding: 20px;
+}
+
+.preview-text pre {
+  white-space: pre-wrap;
+  word-break: break-word;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 18px;
+  font-family: monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #111827;
+}
+
+.preview-html {
+  padding: 24px;
+  background: #fff;
+  color: #111827;
+  min-height: 100%;
+  overflow: auto;
+}
+
+.preview-html h1,
+.preview-html h2,
+.preview-html h3,
+.preview-html h4,
+.preview-html h5,
+.preview-html h6 {
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  color: #111827;
+}
+
+.preview-html p {
+  line-height: 1.65;
+  margin-bottom: 0.85rem;
+}
+
+.preview-html table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+  margin-bottom: 16px;
+  background: white;
+}
+
+.preview-html table,
+.preview-html th,
+.preview-html td {
+  border: 1px solid #d1d5db;
+}
+
+.preview-html th,
+.preview-html td {
+  padding: 8px 10px;
+  text-align: left;
+  font-size: 14px;
+  vertical-align: top;
+}
+
+.preview-html th {
+  background: #f3f4f6;
+  font-weight: 700;
+}
+
+.preview-html img {
+  max-width: 100%;
+}
+
+.preview-html .excel-sheet-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.preview-html .excel-sheet-tab {
+  border: 1px solid #d1d5db;
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.preview-html .excel-sheet-tab.active {
+  background: #2563eb;
+  color: white;
+  border-color: #2563eb;
+}

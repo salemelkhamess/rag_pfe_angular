@@ -1,0 +1,78 @@
+<div class="preview-modal" (click)="close()">
+  <div class="preview-container" (click)="$event.stopPropagation()">
+    <div class="preview-header">
+      <div class="preview-title">
+        <span class="file-icon">{{ getFileIcon() }}</span>
+        <div>
+          <h3>{{ document?.name }}</h3>
+          <p>{{ formatFileSize() }} • {{ document?.mimeType }}</p>
+        </div>
+      </div>
+
+      <div class="preview-actions">
+        <button class="action-btn download" (click)="downloadDocument()" title="Download">
+          ⬇️ Download
+        </button>
+        <button class="action-btn close" (click)="close()" title="Close">
+          ✕
+        </button>
+      </div>
+    </div>
+
+    <div class="preview-body">
+      @if (loading()) {
+        <div class="preview-loading">
+          <div class="spinner"></div>
+          <p>Loading preview...</p>
+        </div>
+      }
+
+      @if (!loading() && error()) {
+        <div class="preview-error">
+          <div class="error-icon">⚠️</div>
+          <h4>Preview not available</h4>
+          <p>{{ error() }}</p>
+          <button class="btn-download" (click)="downloadDocument()">
+            Download Document
+          </button>
+        </div>
+      }
+
+      @if (!loading() && !error() && previewData()?.type === 'image' && previewData()?.url) {
+        <div class="preview-image">
+          <img [src]="sanitizeUrl(previewData()!.url!)" [alt]="document?.name">
+        </div>
+      }
+
+      @if (!loading() && !error() && previewData()?.type === 'pdf' && previewData()?.url) {
+        <div class="preview-pdf">
+          <object
+            [data]="sanitizeUrl(previewData()!.url!)"
+            type="application/pdf"
+            width="100%"
+            height="100%">
+            <p>
+              PDF preview not supported in this browser.
+              <button class="btn-download" (click)="downloadDocument()">Download PDF</button>
+            </p>
+          </object>
+        </div>
+      }
+
+      @if (!loading() && !error() && previewData()?.type === 'text' && previewData()?.content) {
+        <div class="preview-text">
+          <pre>{{ previewData()?.content }}</pre>
+        </div>
+      }
+
+      @if (
+        !loading() &&
+        !error() &&
+        (previewData()?.type === 'docx' || previewData()?.type === 'xlsx') &&
+        previewData()?.html
+        ) {
+        <div class="preview-html" [innerHTML]="sanitizeHtml(previewData()!.html!)"></div>
+      }
+    </div>
+  </div>
+</div>

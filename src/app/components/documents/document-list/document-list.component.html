@@ -1,0 +1,132 @@
+<!-- document-list.component.html -->
+<div class="documents-container">
+  <div class="header">
+    <div>
+      <h2>📚 My Documents</h2>
+      <p class="subtitle">{{ totalElements() }} document(s) in your library</p>
+    </div>
+    <div class="header-actions">
+   <!--   <button class="btn-refresh" (click)="refresh()" title="Refresh">
+        🔄 Refresh
+      </button>-->
+      <a routerLink="/documents/upload" class="btn-upload-link">
+        <span>➕</span> Upload Document
+      </a>
+    </div>
+  </div>
+  <!-- document-list.component.html - Ajouter le modal -->
+  @if (showPreview()) {
+    <app-document-preview
+      [document]="selectedDocumentForPreview()"
+      (closeModal)="closePreview()">
+    </app-document-preview>
+  }
+  <!-- Barre de recherche -->
+  <div class="search-bar">
+    <div class="search-input-wrapper">
+      <span class="search-icon">🔍</span>
+      <input type="text"
+             placeholder="Search documents..."
+             [(ngModel)]="searchTerm"
+             (input)="onSearch()"
+             class="search-input">
+    </div>
+    <select [(ngModel)]="pageSize" (change)="loadDocuments()" class="page-size-select">
+      <option [value]="5">5 per page</option>
+      <option [value]="10">10 per page</option>
+      <option [value]="20">20 per page</option>
+      <option [value]="50">50 per page</option>
+    </select>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading()" class="loading">
+    <div class="spinner"></div>
+    <p>Loading documents...</p>
+  </div>
+
+  <!-- Empty state -->
+  <div *ngIf="!loading() && !hasDocuments()" class="empty-state">
+    <div class="empty-icon">📭</div>
+    <h3>No documents yet</h3>
+    <p>Upload your first document to get started</p>
+    <a routerLink="/documents/upload" class="empty-upload-btn">
+      ➕ Upload Your First Document
+    </a>
+  </div>
+
+  <!-- Document grid -->
+  <div class="document-grid" *ngIf="!loading() && hasDocuments()">
+    <div *ngFor="let doc of documents()" class="document-card">
+      <div class="card-header">
+        <div class="file-icon">{{ getFileIcon(doc) }}</div>
+        <div class="status-badge" [class]="getStatusBadgeClass(doc.status)">
+          {{ doc.status }}
+        </div>
+      </div>
+
+      <div class="card-body">
+        <h3 class="document-title">{{ doc.name }}</h3>
+        <p class="document-description">{{ doc.description || 'No description' }}</p>
+
+        <div class="document-meta">
+          <div class="meta-item">
+            <span class="meta-icon">📄</span>
+            <span>{{ doc.type }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-icon">📅</span>
+            <span>{{ doc.createdAt | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-icon">📊</span>
+            <span>{{ formatFileSize(doc.size) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-actions">
+        <button class="action-btn preview" (click)="previewDocument(doc)" title="Preview">
+          👁️ Preview
+        </button>
+        <button class="action-btn download" (click)="downloadDocument(doc)" title="Download">
+          ⬇️ Download
+        </button>
+        <button class="action-btn delete" (click)="confirmDelete(doc)" title="Delete">
+          🗑️ Delete
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination" *ngIf="!loading() && totalPages() > 1">
+    <button class="page-btn" (click)="previousPage()" [disabled]="currentPage === 0">
+      ← Previous
+    </button>
+    <span class="page-info">
+      Page {{ currentPage + 1 }} of {{ totalPages() }}
+    </span>
+    <button class="page-btn" (click)="nextPage()" [disabled]="currentPage + 1 >= totalPages()">
+      Next →
+    </button>
+  </div>
+
+  <!-- Modal de confirmation de suppression -->
+  <div class="modal" *ngIf="showDeleteModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Confirm Delete</h3>
+        <button class="close-btn" (click)="cancelDelete()">✕</button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete <strong>"{{ selectedDocument?.name }}"</strong>?</p>
+        <p class="warning-text">This action cannot be undone.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" (click)="cancelDelete()">Cancel</button>
+        <button class="btn-confirm" (click)="deleteDocument()">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
