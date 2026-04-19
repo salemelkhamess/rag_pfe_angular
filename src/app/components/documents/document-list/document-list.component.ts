@@ -3,8 +3,8 @@ import { Component, OnInit, OnDestroy, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { Subject, takeUntil, of } from 'rxjs';
-import { catchError, finalize, retry } from 'rxjs/operators';
+import { Subject, takeUntil, of, interval, timer } from 'rxjs';
+import { catchError, finalize, retry, switchMap } from 'rxjs/operators';
 import { DocumentService, PageResponse, Document } from '../../../core/services/document.service';
 import {DocumentPreviewComponent} from '../document-preview/document-preview.component';
 
@@ -39,11 +39,35 @@ export class DocumentListComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadDocuments();
+    this.startPolling();
   }
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  private startPolling(): void {
+    interval(5000)
+      .pipe(
+        takeUntil(this.destroy$),
+        switchMap(() => {
+          const hasPending = this.documents().some(
+            d => d.status === 'PENDING' || d.status === 'PROCESSING'
+          );
+          if (!hasPending || this.isLoading) return of(null);
+          return this.documentService.getDocuments(this.currentPage, this.pageSize).pipe(
+            catchError(() => of(null))
+          );
+        })
+      )
+      .subscribe(response => {
+        if (response) {
+          this.documents.set(response.content || []);
+          this.totalPages.set(response.totalPages || 0);
+          this.totalElements.set(response.totalElements || 0);
+        }
+      });
   }
 
   loadDocuments(): void {
@@ -56,7 +80,7 @@ export class DocumentListComponent implements OnInit, OnDestroy {
       .getDocuments(this.currentPage, this.pageSize)
       .pipe(
         takeUntil(this.destroy$),
-        retry(1),
+        retry({ count: 3, delay: (_, i) => timer(i * 2000) }),
         catchError(error => {
           console.error('Error loading documents:', error);
           return of({

@@ -3,8 +3,8 @@ import {Component, OnDestroy, OnInit, signal} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Subject, Subscription } from 'rxjs';
-import { finalize, takeUntil } from 'rxjs/operators';
+import { Subject, Subscription, timer } from 'rxjs';
+import { finalize, retry } from 'rxjs/operators';
 import { DocumentService } from '../../../core/services/document.service';
 import {Category, CategoryService} from '../../../core/services/category.service';
 
@@ -119,6 +119,7 @@ export class DocumentUploadComponent implements OnDestroy,OnInit {
     this.uploadSubscription = this.documentService
       .uploadDocument(this.selectedFile, this.documentName, this.description, this.documentType, this.selectedCategoryId() || undefined)
       .pipe(
+        retry({ count: 2, delay: (_, i) => timer(i * 2000) }),
         finalize(() => {
           this.stopProgressSimulation();
           this.isUploading = false;
