@@ -15,6 +15,8 @@ export class SidebarComponent {
     { path: '/categories', icon: '📄', label: 'Catégories documents' },
 
     { path: '/documents', icon: '📄', label: 'Documents' },
+    { path: '/conversations', icon: '💬', label: 'Conversations' },
+
     { path: '/chat', icon: '💬', label: 'Chat RAG' },
     { path: '/users', icon: '👥', label: 'Utilisateurs' },
     { path: '/settings', icon: '⚙️', label: 'Paramètres' }

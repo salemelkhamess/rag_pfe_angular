@@ -1,7 +1,8 @@
-import { Component, Output, EventEmitter, HostListener } from '@angular/core';
+import { Component, Output, EventEmitter, HostListener, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import {AuthService} from '../../../../core/services/auth.service';
+import { AuthService } from '../../../../core/services/auth.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-header',
@@ -10,7 +11,7 @@ import {AuthService} from '../../../../core/services/auth.service';
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.css']
 })
-export class HeaderComponent {
+export class HeaderComponent implements OnDestroy {
   @Output() menuToggle = new EventEmitter<void>();
 
   isMobile = false;
@@ -29,9 +30,12 @@ export class HeaderComponent {
     { id: 2, message: 'Question répondue avec succès', time: '1 heure' }
   ];
 
+  private userSub?: Subscription;
+
   constructor(
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {
     this.checkScreenSize();
     this.loadUserInfo();
@@ -47,16 +51,22 @@ export class HeaderComponent {
   }
 
   loadUserInfo() {
-    // Récupérer les informations de l'utilisateur connecté
-    this.authService.currentUser$.subscribe(user => {
+    this.userSub = this.authService.currentUser$.subscribe(user => {
       if (user) {
-        this.user = {
-          name: `${user.firstName} ${user.lastName}` || user.username,
-          avatar: this.getInitials(user.firstName, user.lastName),
-          email: user.email
-        };
+        Promise.resolve().then(() => {
+          this.user = {
+            name: `${user.firstName} ${user.lastName}` || user.username,
+            avatar: this.getInitials(user.firstName, user.lastName),
+            email: user.email
+          };
+          this.cdr.detectChanges();
+        });
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    this.userSub?.unsubscribe();
   }
 
   getInitials(firstName?: string, lastName?: string): string {

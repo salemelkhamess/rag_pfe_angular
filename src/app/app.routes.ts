@@ -40,8 +40,12 @@ export const routes: Routes = [
       { path: 'categories', loadComponent: () => import('./components/categories/category-list/category-list.component').then(m => m.CategoryListComponent) },
       { path: 'categories/create', loadComponent: () => import('./components/categories/category-form/category-form.component').then(m => m.CategoryFormComponent) },
       { path: 'categories/edit/:id', loadComponent: () => import('./components/categories/category-form/category-form.component').then(m => m.CategoryFormComponent) },
+      { path: 'conversations', loadComponent: () => import('./components/conversation/conversation-list/conversation-list.component').then(m => m.ConversationListComponent) },
+      { path: 'conversations/new', loadComponent: () => import('./components/conversation/chat/chat.component').then(m => m.ChatComponent) },
+      { path: 'conversations/:id', loadComponent: () => import('./components/conversation/chat/chat.component').then(m => m.ChatComponent) },
     ]
   },
+
   {
     path: '**',
     redirectTo: '/dashboard'

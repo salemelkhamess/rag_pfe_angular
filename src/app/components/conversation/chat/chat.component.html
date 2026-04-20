@@ -1,0 +1,177 @@
+<div class="chat-container">
+
+  <!-- Header -->
+  <div class="chat-header">
+    <div class="header-left">
+      <a routerLink="/conversations" class="back-btn" title="Retour">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 12H5M12 5l-7 7 7 7"/>
+        </svg>
+      </a>
+      <div class="header-info">
+        @if (isNewConversation()) {
+          <h2>Nouvelle conversation</h2>
+        } @else {
+          <h2>{{ conversation()?.title || 'Conversation' }}</h2>
+          <span class="msg-count">{{ messages().length }} messages</span>
+        }
+      </div>
+    </div>
+    @if (!isNewConversation() && conversationId()) {
+      <button class="delete-btn" (click)="deleteConversation()" title="Supprimer la conversation">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/>
+        </svg>
+        Supprimer
+      </button>
+    }
+  </div>
+
+  <!-- Loading -->
+  @if (loading()) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Chargement...</p>
+    </div>
+  }
+
+  <!-- New Conversation Form -->
+  @if (!loading() && isNewConversation()) {
+    <div class="new-conversation-form">
+      <div class="new-conv-icon">🤖</div>
+      <h3>Démarrer une conversation</h3>
+      <p class="new-conv-subtitle">Posez une question sur vos documents</p>
+
+      <div class="form-group">
+        <label>Titre (optionnel)</label>
+        <input type="text"
+               [(ngModel)]="newConversationTitle"
+               placeholder="Ex: Analyse des factures"
+               class="form-control" />
+      </div>
+
+      <div class="form-group">
+        <label>Votre première question *</label>
+        <textarea
+          [(ngModel)]="inputMessage"
+          (keydown)="onKeydown($event)"
+          placeholder="Que voulez-vous savoir ?"
+          class="form-control textarea-first"
+          rows="3"
+        ></textarea>
+      </div>
+
+      <button class="btn-start" (click)="createAndSend()" [disabled]="!inputMessage.trim()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+        Démarrer
+      </button>
+    </div>
+  }
+
+  <!-- Messages -->
+  @if (!loading() && !isNewConversation()) {
+    <div class="messages-container" #messagesContainer>
+
+      @if (messages().length === 0) {
+        <div class="empty-chat">
+          <div class="empty-icon">💬</div>
+          <p>Posez une question pour commencer</p>
+        </div>
+      }
+
+      @for (message of messages(); track message.id) {
+        <div class="message-row" [class.user-row]="message.role === 'user'">
+          <div class="avatar" [class.user-avatar]="message.role === 'user'">
+            {{ message.role === 'user' ? '👤' : '🤖' }}
+          </div>
+          <div class="bubble-wrapper">
+            <div class="bubble" [class.user-bubble]="message.role === 'user'">
+              <div class="message-text">{{ message.content }}</div>
+
+              @if (message.role === 'assistant') {
+                <!-- Sources -->
+                @let sources = parseSources(message.sources);
+                @if (sources.length > 0) {
+                  <div class="sources">
+                    <div class="sources-title">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+                      </svg>
+                      Sources
+                    </div>
+                    <ul class="sources-list">
+                      @for (src of sources; track src) {
+                        <li>{{ src }}</li>
+                      }
+                    </ul>
+                  </div>
+                }
+
+                <!-- Feedback -->
+                @if (!message.feedback) {
+                  <div class="feedback-row">
+                    <span class="feedback-label">Utile ?</span>
+                    <button class="fb-btn fb-yes" (click)="addFeedback(message, 'helpful', 5)" title="Utile">
+                      👍
+                    </button>
+                    <button class="fb-btn fb-no" (click)="addFeedback(message, 'not_helpful', 1)" title="Pas utile">
+                      👎
+                    </button>
+                  </div>
+                } @else {
+                  <div class="feedback-given">
+                    {{ message.feedback.feedbackType === 'helpful' ? '👍 Merci !' : '👎 Noté' }}
+                  </div>
+                }
+
+                <!-- Processing time -->
+                @if (message.processingTimeMs) {
+                  <div class="msg-meta">⏱ {{ formatTime(message.processingTimeMs) }}</div>
+                }
+              }
+            </div>
+
+            @if (message.createdAt) {
+              <div class="msg-time" [class.user-time]="message.role === 'user'">
+                {{ message.createdAt | date:'HH:mm' }}
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Typing indicator -->
+      @if (sending()) {
+        <div class="message-row">
+          <div class="avatar">🤖</div>
+          <div class="bubble-wrapper">
+            <div class="bubble">
+              <div class="typing">
+                <span></span><span></span><span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Input -->
+    <div class="input-area">
+      <textarea
+        [(ngModel)]="inputMessage"
+        (keydown)="onKeydown($event)"
+        placeholder="Écrivez votre message... (Entrée pour envoyer, Maj+Entrée pour nouvelle ligne)"
+        [disabled]="sending()"
+        rows="1"
+        class="message-input"
+      ></textarea>
+      <button class="send-btn" (click)="sendMessage()" [disabled]="sending() || !inputMessage.trim()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+      </button>
+    </div>
+  }
+</div>
