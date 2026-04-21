@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ConversationService, Conversation, Message } from '../../../core/services/conversation.service';
+import { LlmService, ProviderInfo } from '../../../core/services/llm.service';
 
 @Component({
   selector: 'app-chat',
@@ -13,6 +14,7 @@ import { ConversationService, Conversation, Message } from '../../../core/servic
 })
 export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
   private conversationService = inject(ConversationService);
+  private llmService = inject(LlmService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
 
@@ -28,7 +30,21 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
   isNewConversation = signal(false);
   private shouldScroll = false;
 
+  providers = signal<ProviderInfo[]>([
+    { name: 'ollama', available: true, defaultModel: 'llama3:latest', models: ['llama3:latest', 'mistral:latest', 'deepseek-r1:latest', 'gemma4:latest', 'qwen3.5:cloud', 'gpt-oss:20b'] },
+    { name: 'openai', available: true, defaultModel: 'gpt-4o-mini', models: ['gpt-4o-mini', 'gpt-3.5-turbo', 'gpt-4', 'gpt-4-turbo', 'gpt-4o'] }
+  ]);
+  selectedProvider = localStorage.getItem('llm_provider') ?? 'ollama';
+  selectedModel = localStorage.getItem('llm_model') ?? 'llama3:latest';
+
+  get currentModels(): string[] {
+    const provider = this.providers().find(p => p.name === this.selectedProvider);
+    const models = provider?.models ?? [this.selectedModel];
+    return models.filter(m => m && m.trim().length > 0);
+  }
+
   ngOnInit(): void {
+    this.loadProviders();
     const id = this.route.snapshot.paramMap.get('id');
     if (id === 'new' || !id) {
       this.isNewConversation.set(true);
@@ -37,6 +53,39 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
       this.conversationId.set(id);
       this.loadConversation(id);
     }
+  }
+
+  loadProviders(): void {
+    this.llmService.getProviders().subscribe({
+      next: (providers) => {
+        if (providers && providers.length > 0) {
+          this.providers.set(providers);
+          const available = providers.find(p => p.available);
+          if (available) {
+            this.selectedProvider = available.name;
+            this.selectedModel = available.defaultModel || available.models?.[0] || this.selectedModel;
+          }
+        }
+      },
+      error: () => {}
+    });
+  }
+
+  onProviderChange(): void {
+    const provider = this.providers().find(p => p.name === this.selectedProvider);
+    if (provider) {
+      this.selectedModel = provider.defaultModel || provider.models?.[0] || '';
+    }
+    this.saveSelection();
+  }
+
+  onModelChange(): void {
+    this.saveSelection();
+  }
+
+  private saveSelection(): void {
+    localStorage.setItem('llm_provider', this.selectedProvider);
+    localStorage.setItem('llm_model', this.selectedModel);
   }
 
   ngAfterViewChecked(): void {
@@ -115,21 +164,38 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
     this.sending.set(true);
     this.shouldScroll = true;
 
-    this.conversationService.addMessage(conversationId, { content: message }).subscribe({
-      next: (aiMessage) => {
-        this.messages.update(msgs => [...msgs, aiMessage]);
+    this.conversationService.addMessage(conversationId, {
+      content: message,
+      llmProvider: this.selectedProvider,
+      llmModel: this.selectedModel
+    }).subscribe({
+      next: (response) => {
+        if (response.role === 'assistant') {
+          this.messages.update(msgs => [...msgs, response]);
+        } else {
+          // agent failed: backend returned the user message — replace optimistic + add error
+          this.messages.update(msgs =>
+            msgs.map(m => m.id === optimisticUser.id ? response : m)
+          );
+          this.messages.update(msgs => [...msgs, {
+            id: `err-${Date.now()}`,
+            conversationId,
+            role: 'assistant' as const,
+            content: "L'agent n'a pas pu répondre. Vérifiez qu'Ollama tourne et réessayez.",
+            createdAt: new Date().toISOString()
+          }]);
+        }
         this.sending.set(false);
         this.shouldScroll = true;
       },
       error: () => {
-        const errMsg: Message = {
+        this.messages.update(msgs => [...msgs, {
           id: `err-${Date.now()}`,
           conversationId,
-          role: 'assistant',
-          content: 'Désolé, une erreur s\'est produite. Veuillez réessayer.',
+          role: 'assistant' as const,
+          content: "Désolé, une erreur s'est produite. Veuillez réessayer.",
           createdAt: new Date().toISOString()
-        };
-        this.messages.update(msgs => [...msgs, errMsg]);
+        }]);
         this.sending.set(false);
         this.shouldScroll = true;
       }

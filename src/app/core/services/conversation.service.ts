@@ -57,6 +57,8 @@ export interface CreateMessageRequest {
   content: string;
   sources?: string;
   metadata?: any;
+  llmProvider?: string;
+  llmModel?: string;
 }
 
 export interface CreateFeedbackRequest {
