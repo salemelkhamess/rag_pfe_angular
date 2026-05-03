@@ -116,8 +116,8 @@
             {{ message.role === 'user' ? '👤' : '🤖' }}
           </div>
           <div class="bubble-wrapper">
-            <div class="bubble" [class.user-bubble]="message.role === 'user'">
-              <div class="message-text">{{ message.content }}</div>
+            <div class="bubble" [class.user-bubble]="message.role === 'user'" [class.streaming-bubble]="message.id === STREAMING_ID">
+              <div class="message-text">{{ message.content }}<span *ngIf="message.id === STREAMING_ID && isStreaming()" class="stream-cursor"></span></div>
 
               @if (message.role === 'assistant') {
                 <!-- Sources -->

@@ -457,3 +457,24 @@
 }
 .send-btn:hover:not(:disabled) { background: #1d4ed8; transform: scale(1.05); }
 .send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Streaming cursor */
+.stream-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background: #3b82f6;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  animation: blink 0.8s step-end infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+.streaming-bubble {
+  background: linear-gradient(135deg, #f0f7ff 0%, #e8f4fd 100%);
+  border: 1px solid #bfdbfe;
+}

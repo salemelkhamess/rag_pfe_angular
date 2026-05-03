@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy, signal, inject, ElementRef, ViewChild, Af
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { ConversationService, Conversation, Message } from '../../../core/services/conversation.service';
+import { ConversationService, Conversation, Message, StreamCallbacks } from '../../../core/services/conversation.service';
 import { LlmService, ProviderInfo } from '../../../core/services/llm.service';
 
 @Component({
@@ -25,10 +25,14 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
   messages = signal<Message[]>([]);
   loading = signal(true);
   sending = signal(false);
+  isStreaming = signal(false);
   inputMessage = '';
   newConversationTitle = '';
   isNewConversation = signal(false);
   private shouldScroll = false;
+  private streamController: AbortController | null = null;
+
+  readonly STREAMING_ID = '__streaming__';
 
   providers = signal<ProviderInfo[]>([
     { name: 'ollama', available: true, defaultModel: 'llama3:latest', models: ['llama3:latest', 'mistral:latest', 'deepseek-r1:latest', 'gemma4:latest', 'qwen3.5:cloud', 'gpt-oss:20b'] },
@@ -51,7 +55,19 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
       this.loading.set(false);
     } else {
       this.conversationId.set(id);
-      this.loadConversation(id);
+      const initialMessage = (window.history.state as any)?.initialMessage as string | undefined;
+      if (initialMessage) {
+        this.conversationService.getConversation(id).subscribe({
+          next: (conv) => {
+            this.conversation.set(conv);
+            this.loading.set(false);
+            this.doSendMessage(initialMessage);
+          },
+          error: () => this.loading.set(false)
+        });
+      } else {
+        this.loadConversation(id);
+      }
     }
   }
 
@@ -60,10 +76,13 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
       next: (providers) => {
         if (providers && providers.length > 0) {
           this.providers.set(providers);
-          const available = providers.find(p => p.available);
-          if (available) {
-            this.selectedProvider = available.name;
-            this.selectedModel = available.defaultModel || available.models?.[0] || this.selectedModel;
+          // Only apply API defaults when the user has no saved preference
+          if (!localStorage.getItem('llm_provider')) {
+            const available = providers.find(p => p.available);
+            if (available) {
+              this.selectedProvider = available.name;
+              this.selectedModel = available.defaultModel || available.models?.[0] || this.selectedModel;
+            }
           }
         }
       },
@@ -125,12 +144,12 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
     this.loading.set(true);
     this.conversationService.createConversation({ title, agentType: 'document_qa' }).subscribe({
       next: (conv) => {
-        this.conversationId.set(conv.id);
-        this.conversation.set(conv);
-        this.isNewConversation.set(false);
-        this.router.navigate(['/conversations', conv.id], { replaceUrl: true });
-        this.loading.set(false);
-        this.doSendMessage(firstMessage);
+        // Navigate avec le message initial dans le state.
+        // Le nouveau composant le récupère dans ngOnInit() et démarre le stream.
+        this.router.navigate(['/conversations', conv.id], {
+          replaceUrl: true,
+          state: { initialMessage: firstMessage }
+        });
       },
       error: () => this.loading.set(false)
     });
@@ -152,54 +171,63 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
     const conversationId = this.conversationId();
     if (!conversationId) return;
 
-    const optimisticUser: Message = {
-      id: `tmp-${Date.now()}`,
-      conversationId,
-      role: 'user',
-      content: message,
-      createdAt: new Date().toISOString()
-    };
-    this.messages.update(msgs => [...msgs, optimisticUser]);
     this.inputMessage = '';
     this.sending.set(true);
+    this.isStreaming.set(false);
     this.shouldScroll = true;
 
-    this.conversationService.addMessage(conversationId, {
-      content: message,
-      llmProvider: this.selectedProvider,
-      llmModel: this.selectedModel
-    }).subscribe({
-      next: (response) => {
-        if (response.role === 'assistant') {
-          this.messages.update(msgs => [...msgs, response]);
-        } else {
-          // agent failed: backend returned the user message — replace optimistic + add error
-          this.messages.update(msgs =>
-            msgs.map(m => m.id === optimisticUser.id ? response : m)
-          );
-          this.messages.update(msgs => [...msgs, {
-            id: `err-${Date.now()}`,
-            conversationId,
-            role: 'assistant' as const,
-            content: "L'agent n'a pas pu répondre. Vérifiez qu'Ollama tourne et réessayez.",
-            createdAt: new Date().toISOString()
-          }]);
-        }
-        this.sending.set(false);
+    const streamingPlaceholder: Message = {
+      id: this.STREAMING_ID,
+      conversationId,
+      role: 'assistant',
+      content: '',
+      createdAt: new Date().toISOString()
+    };
+
+    const callbacks: StreamCallbacks = {
+      onUserSaved: (userMsg) => {
+        this.messages.update(msgs => [...msgs, userMsg, streamingPlaceholder]);
+        this.isStreaming.set(true);
         this.shouldScroll = true;
       },
-      error: () => {
+      onToken: (token) => {
+        this.messages.update(msgs =>
+          msgs.map(m => m.id === this.STREAMING_ID
+            ? { ...m, content: m.content + token }
+            : m)
+        );
+        this.shouldScroll = true;
+      },
+      onDone: (aiMsg) => {
+        this.messages.update(msgs =>
+          msgs.map(m => m.id === this.STREAMING_ID ? aiMsg : m)
+        );
+        this.sending.set(false);
+        this.isStreaming.set(false);
+        this.shouldScroll = true;
+      },
+      onError: (err) => {
+        this.messages.update(msgs =>
+          msgs.filter(m => m.id !== this.STREAMING_ID)
+        );
         this.messages.update(msgs => [...msgs, {
           id: `err-${Date.now()}`,
           conversationId,
           role: 'assistant' as const,
-          content: "Désolé, une erreur s'est produite. Veuillez réessayer.",
+          content: err.includes('HTTP') ? "Désolé, une erreur s'est produite." : err,
           createdAt: new Date().toISOString()
         }]);
         this.sending.set(false);
+        this.isStreaming.set(false);
         this.shouldScroll = true;
       }
-    });
+    };
+
+    this.streamController = this.conversationService.streamMessage(
+      conversationId,
+      { content: message, llmProvider: this.selectedProvider, llmModel: this.selectedModel },
+      callbacks
+    );
   }
 
   addFeedback(message: Message, feedbackType: string, rating: number): void {
@@ -259,5 +287,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
     } catch {}
   }
 
-  ngOnDestroy(): void {}
+  ngOnDestroy(): void {
+    this.streamController?.abort();
+  }
 }
