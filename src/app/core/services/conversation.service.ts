@@ -31,6 +31,14 @@ export interface Message {
   feedback?: Feedback;
 }
 
+export interface SourceReference {
+  documentId?: string;
+  documentName: string;
+  pageNumber?: number;
+  chunkIndex?: number;
+  score?: number;
+}
+
 export interface Feedback {
   id: string;
   messageId: string;

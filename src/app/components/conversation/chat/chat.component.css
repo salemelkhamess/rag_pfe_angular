@@ -273,11 +273,42 @@
   margin-bottom: 0.3rem;
 }
 .sources-list {
-  margin: 0;
-  padding-left: 1rem;
+  margin: 0.25rem 0 0;
+  padding: 0;
+  list-style: none;
   color: #6b7280;
 }
-.sources-list li { margin-bottom: 0.2rem; }
+.source-item {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.25rem;
+  padding: 0.2rem 0.4rem;
+  border-radius: 6px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+.source-icon { font-size: 0.75rem; flex-shrink: 0; }
+.source-name { flex: 1; font-size: 0.75rem; color: #374151; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.source-page {
+  font-size: 0.7rem;
+  color: #6366f1;
+  background: #eef2ff;
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.source-score {
+  font-size: 0.68rem;
+  color: #059669;
+  background: #ecfdf5;
+  padding: 0.1rem 0.3rem;
+  border-radius: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  cursor: help;
+}
 
 /* Feedback */
 .feedback-row {

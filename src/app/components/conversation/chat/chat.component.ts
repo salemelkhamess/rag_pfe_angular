@@ -1,14 +1,14 @@
 import { Component, OnInit, OnDestroy, signal, inject, ElementRef, ViewChild, AfterViewChecked } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { ConversationService, Conversation, Message, StreamCallbacks } from '../../../core/services/conversation.service';
+import { ConversationService, Conversation, Message, StreamCallbacks, SourceReference } from '../../../core/services/conversation.service';
 import { LlmService, ProviderInfo } from '../../../core/services/llm.service';
 
 @Component({
   selector: 'app-chat',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, DecimalPipe],
   templateUrl: './chat.component.html',
   styleUrls: ['./chat.component.css']
 })
@@ -258,14 +258,25 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
     }
   }
 
-  parseSources(sources: string | undefined): string[] {
+  parseSources(sources: string | undefined): SourceReference[] {
     if (!sources) return [];
     try {
       const parsed = JSON.parse(sources);
-      return Array.isArray(parsed) ? parsed : [];
+      if (!Array.isArray(parsed)) return [];
+      return parsed.map((s: any) =>
+        typeof s === 'string'
+          ? { documentName: s }
+          : { documentName: s.documentName, pageNumber: s.pageNumber, chunkIndex: s.chunkIndex, score: s.score, documentId: s.documentId }
+      );
     } catch {
       return [];
     }
+  }
+
+  formatSource(src: SourceReference): string {
+    let label = src.documentName;
+    if (src.pageNumber != null) label += ` — p. ${src.pageNumber}`;
+    return label;
   }
 
   formatTime(ms: number | undefined): string {

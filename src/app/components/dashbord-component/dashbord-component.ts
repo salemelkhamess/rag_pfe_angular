@@ -1,117 +1,129 @@
-import {Component, OnInit} from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {AuthService} from '../../core/services/auth.service';
-import {Router} from '@angular/router';
+import { RouterLink } from '@angular/router';
+import { AuthService } from '../../core/services/auth.service';
+import { DocumentService, Document } from '../../core/services/document.service';
+import { ConversationService, Conversation } from '../../core/services/conversation.service';
+import { CategoryService } from '../../core/services/category.service';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 @Component({
   selector: 'app-dashbord-component',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './dashbord-component.html',
   styleUrl: './dashbord-component.css',
 })
-export class DashbordComponent  implements OnInit{
+export class DashbordComponent implements OnInit {
   currentUser: any;
+  loading = signal(true);
 
-  constructor(
-    private authService: AuthService,
-    private router: Router
-  ) {}
+  documentCount = signal(0);
+  conversationCount = signal(0);
+  categoryCount = signal(0);
+  recentDocuments = signal<Document[]>([]);
+  recentConversations = signal<Conversation[]>([]);
 
-  ngOnInit() {
-    this.authService.currentUser$.subscribe(user => {
-      this.currentUser = user;
-    });
-  }
+  stats = signal([
+    { title: 'Documents', value: '—', icon: '📄', color: '#667eea', link: '/documents' },
+    { title: 'Conversations', value: '—', icon: '💬', color: '#48bb78', link: '/conversations' },
+    { title: 'Catégories', value: '—', icon: '🗂️', color: '#f6ad55', link: '/categories' },
+    { title: 'Taux de succès', value: '—', icon: '🎯', color: '#fc8181', link: null },
+  ]);
 
-  logout() {
-    this.authService.logout().subscribe({
-      next: () => {
-        this.router.navigate(['/login']);
-      }
-    });
-  }
-
-  // Statistiques principales
-  stats = [
-    {
-      title: 'Documents',
-      value: '1,234',
-      icon: '📄',
-      change: '+12%',
-      color: '#667eea'
-    },
-    {
-      title: 'Questions traitées',
-      value: '8,549',
-      icon: '💬',
-      change: '+23%',
-      color: '#48bb78'
-    },
-    {
-      title: 'Taux de réponse',
-      value: '94.5%',
-      icon: '🎯',
-      change: '+5.2%',
-      color: '#f6ad55'
-    },
-    {
-      title: 'Utilisateurs actifs',
-      value: '342',
-      icon: '👥',
-      change: '+18%',
-      color: '#fc8181'
-    }
-  ];
-
-  // Données pour les graphiques
   chartData = {
     labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'],
     queries: [45, 52, 48, 62, 78, 85, 92, 110, 125, 142, 168, 189],
     documents: [12, 19, 25, 32, 41, 55, 68, 82, 95, 110, 128, 145]
   };
 
-  // Documents récents
-  recentDocuments = [
-    { name: 'Guide utilisateur RAG.pdf', type: 'PDF', size: '2.4 MB', date: '2024-03-30', status: 'indexé' },
-    { name: 'Documentation API.docx', type: 'DOCX', size: '1.8 MB', date: '2024-03-29', status: 'indexé' },
-    { name: 'Rapport trimestriel Q1.pdf', type: 'PDF', size: '3.2 MB', date: '2024-03-28', status: 'en cours' },
-    { name: 'FAQ Client.xlsx', type: 'XLSX', size: '856 KB', date: '2024-03-27', status: 'indexé' },
-    { name: 'Spécifications techniques.pdf', type: 'PDF', size: '4.1 MB', date: '2024-03-26', status: 'erreur' }
-  ];
+  constructor(
+    private authService: AuthService,
+    private documentService: DocumentService,
+    private conversationService: ConversationService,
+    private categoryService: CategoryService
+  ) {}
 
-  // Questions récentes
-  recentQueries = [
-    { question: "Quels sont les avantages de RAG ?", response: "RAG combine la recherche d'informations avec la génération...", time: "Il y a 5 min", rating: 4.5 },
-    { question: "Comment importer des documents ?", response: "Vous pouvez importer des documents via l'interface d'administration...", time: "Il y a 12 min", rating: 5 },
-    { question: "Le système supporte-t-il le français ?", response: "Oui, le système supporte parfaitement le français...", time: "Il y a 1 heure", rating: 4 },
-    { question: "Comment améliorer la précision ?", response: "Pour améliorer la précision, assurez-vous d'avoir des documents...", time: "Il y a 2 heures", rating: 3.5 }
-  ];
-
-  // Activité récente
-  activities = [
-    { user: 'John Doe', action: 'a ajouté un document', item: 'Guide RAG.pdf', time: '5 min', avatar: '👨‍💼' },
-    { user: 'Jane Smith', action: 'a posé une question', item: 'Comment utiliser RAG ?', time: '12 min', avatar: '👩‍💼' },
-    { user: 'Admin', action: 'a mis à jour les paramètres', item: 'Configuration système', time: '1 heure', avatar: '👨‍💻' },
-    { user: 'Marie Martin', action: 'a exporté un rapport', item: 'Statistiques Q1', time: '2 heures', avatar: '👩‍💻' }
-  ];
-
-  // Méthodes
-  getStatusClass(status: string): string {
-    switch(status) {
-      case 'indexé': return 'status-success';
-      case 'en cours': return 'status-warning';
-      case 'erreur': return 'status-error';
-      default: return '';
-    }
+  ngOnInit() {
+    this.authService.currentUser$.subscribe(user => { this.currentUser = user; });
+    this.loadDashboardData();
   }
 
-  getRatingStars(rating: number): string {
-    const fullStars = Math.floor(rating);
-    const halfStar = rating % 1 !== 0;
-    let stars = '★'.repeat(fullStars);
-    if (halfStar) stars += '½';
-    stars += '☆'.repeat(5 - Math.ceil(rating));
-    return stars;
+  private loadDashboardData(): void {
+    forkJoin({
+      docs: this.documentService.getDocuments(0, 5).pipe(catchError(() => of(null))),
+      convs: this.conversationService.getConversations(0, 5).pipe(catchError(() => of(null))),
+      cats: this.categoryService.getAllCategories().pipe(catchError(() => of(null))),
+    }).subscribe(({ docs, convs, cats }) => {
+      const docTotal = docs?.totalElements ?? 0;
+      const convTotal = convs?.totalCount ?? 0;
+      const catTotal = Array.isArray(cats) ? cats.length : 0;
+
+      this.documentCount.set(docTotal);
+      this.conversationCount.set(convTotal);
+      this.categoryCount.set(catTotal);
+      this.recentDocuments.set(docs?.content ?? []);
+      this.recentConversations.set(convs?.conversations ?? []);
+
+      this.stats.set([
+        { title: 'Documents', value: this.formatCount(docTotal), icon: '📄', color: '#667eea', link: '/documents' },
+        { title: 'Conversations', value: this.formatCount(convTotal), icon: '💬', color: '#48bb78', link: '/conversations' },
+        { title: 'Catégories', value: this.formatCount(catTotal), icon: '🗂️', color: '#f6ad55', link: '/categories' },
+        { title: 'Documents indexés', value: this.formatIndexed(docs?.content ?? []), icon: '✅', color: '#6366f1', link: '/documents' },
+      ]);
+
+      this.loading.set(false);
+    });
+  }
+
+  private formatCount(n: number): string {
+    return n >= 1000 ? (n / 1000).toFixed(1) + 'k' : n.toString();
+  }
+
+  private formatIndexed(docs: Document[]): string {
+    const total = this.documentCount();
+    if (total === 0) return '0%';
+    const indexed = docs.filter(d => d.status === 'INDEXED' || d.status === 'indexé').length;
+    const ratio = total > 5 ? Math.round((indexed / docs.length) * 100) : 100;
+    return ratio + '%';
+  }
+
+  getStatusClass(status: string): string {
+    const s = status?.toLowerCase();
+    if (s === 'indexed' || s === 'indexé') return 'status-success';
+    if (s === 'processing' || s === 'en cours') return 'status-warning';
+    if (s === 'error' || s === 'erreur') return 'status-error';
+    return 'status-warning';
+  }
+
+  getStatusLabel(status: string): string {
+    const s = status?.toLowerCase();
+    if (s === 'indexed') return 'Indexé';
+    if (s === 'processing') return 'En cours';
+    if (s === 'error') return 'Erreur';
+    return status ?? '—';
+  }
+
+  formatSize(bytes: number): string {
+    if (!bytes) return '—';
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  }
+
+  getFileType(mimeType: string | undefined): string {
+    if (!mimeType) return '—';
+    const parts = mimeType.split('/');
+    return parts.length > 1 ? parts[1].toUpperCase() : mimeType.toUpperCase();
+  }
+
+  formatDate(date: string): string {
+    if (!date) return '—';
+    return new Date(date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+
+  get barMax(): number {
+    return Math.max(...this.chartData.queries);
   }
 }

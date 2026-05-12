@@ -128,11 +128,22 @@
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
                       </svg>
-                      Sources
+                      Sources ({{ sources.length }})
                     </div>
                     <ul class="sources-list">
-                      @for (src of sources; track src) {
-                        <li>{{ src }}</li>
+                      @for (src of sources; track src.documentName) {
+                        <li class="source-item">
+                          <span class="source-icon">📄</span>
+                          <span class="source-name">{{ src.documentName }}</span>
+                          @if (src.pageNumber != null) {
+                            <span class="source-page">p. {{ src.pageNumber }}</span>
+                          }
+                          @if (src.score != null) {
+                            <span class="source-score" [title]="'Pertinence: ' + (src.score * 100 | number:'1.0-0') + '%'">
+                              {{ src.score * 100 | number:'1.0-0' }}%
+                            </span>
+                          }
+                        </li>
                       }
                     </ul>
                   </div>

@@ -2,13 +2,13 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CategoryService, Category, CategoryRequest } from '../../../core/services/category.service';
 
 @Component({
   selector: 'app-category-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule],
   templateUrl: './category-form.component.html',
   styleUrls: ['./category-form.component.css']
 })
