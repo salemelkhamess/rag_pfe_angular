@@ -109,9 +109,15 @@ export class DocumentService {
   }
 
   downloadDocument(id: string, fileName: string): Observable<Blob> {
-    return this.http.get(`${this.apiUrl}/${id}/download`, {
-      responseType: 'blob'
-    });
+    return this.http.get(`${this.apiUrl}/${id}/download`, { responseType: 'blob' });
+  }
+
+  previewDocument(id: string): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/${id}/preview`, { responseType: 'blob' });
+  }
+
+  reindexDocument(id: string): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/${id}/reindex`, {});
   }
 
   deleteDocument(id: string): Observable<void> {

@@ -81,13 +81,33 @@
 
       <div class="form-group">
         <label>Votre première question *</label>
-        <textarea
-          [(ngModel)]="inputMessage"
-          (keydown)="onKeydown($event)"
-          placeholder="Que voulez-vous savoir ?"
-          class="form-control textarea-first"
-          rows="3"
-        ></textarea>
+        <div class="textarea-voice-wrap">
+          <textarea
+            [(ngModel)]="inputMessage"
+            (keydown)="onKeydown($event)"
+            placeholder="Que voulez-vous savoir ?"
+            class="form-control textarea-first"
+            rows="3"
+          ></textarea>
+          @if (voiceSupported) {
+            <button class="mic-btn-form" [class.mic-active]="isListening()"
+                    (click)="toggleVoice()" type="button"
+                    [title]="isListening() ? 'Arrêter' : 'Dicter'">
+              @if (isListening()) {
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                  <rect x="6" y="6" width="12" height="12" rx="2"/>
+                </svg>
+              } @else {
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="9" y="2" width="6" height="11" rx="3"/>
+                  <path d="M5 10a7 7 0 0 0 14 0"/>
+                  <line x1="12" y1="19" x2="12" y2="22"/>
+                  <line x1="8" y1="22" x2="16" y2="22"/>
+                </svg>
+              }
+            </button>
+          }
+        </div>
       </div>
 
       <button class="btn-start" (click)="createAndSend()" [disabled]="!inputMessage.trim()">
@@ -132,8 +152,10 @@
                     </div>
                     <ul class="sources-list">
                       @for (src of sources; track src.documentName) {
-                        <li class="source-item">
-                          <span class="source-icon">📄</span>
+                        <li class="source-item source-clickable"
+                            (click)="openSource(src)"
+                            [title]="'Ouvrir ' + src.documentName">
+                          <span class="source-icon">{{ getSourceIcon(src.documentName) }}</span>
                           <span class="source-name">{{ src.documentName }}</span>
                           @if (src.pageNumber != null) {
                             <span class="source-page">p. {{ src.pageNumber }}</span>
@@ -143,6 +165,12 @@
                               {{ src.score * 100 | number:'1.0-0' }}%
                             </span>
                           }
+                          <span class="source-open-icon" title="Ouvrir">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                              <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+                            </svg>
+                          </span>
                         </li>
                       }
                     </ul>
@@ -223,7 +251,26 @@
           [disabled]="sending()"
           rows="1"
           class="message-input"
+          [class.listening-border]="isListening()"
         ></textarea>
+        @if (voiceSupported) {
+          <button class="mic-btn" [class.mic-active]="isListening()"
+                  (click)="toggleVoice()" type="button" [disabled]="sending()"
+                  [title]="isListening() ? 'Arrêter l\'enregistrement' : 'Dicter un message'">
+            @if (isListening()) {
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                <rect x="6" y="6" width="12" height="12" rx="2"/>
+              </svg>
+            } @else {
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="9" y="2" width="6" height="11" rx="3"/>
+                <path d="M5 10a7 7 0 0 0 14 0"/>
+                <line x1="12" y1="19" x2="12" y2="22"/>
+                <line x1="8" y1="22" x2="16" y2="22"/>
+              </svg>
+            }
+          </button>
+        }
         <button class="send-btn" (click)="sendMessage()" [disabled]="sending() || !inputMessage.trim()">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>

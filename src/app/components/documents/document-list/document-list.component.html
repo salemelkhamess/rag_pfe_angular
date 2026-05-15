@@ -98,6 +98,11 @@
         <button class="action-btn download" (click)="downloadDocument(doc)" title="Download">
           ⬇️ Download
         </button>
+        <button class="action-btn reindex" (click)="reindexDocument(doc)"
+                [disabled]="reindexingId() === doc.id"
+                title="Re-indexer dans ChromaDB">
+          {{ reindexingId() === doc.id ? '⏳' : '🔄' }} Re-indexer
+        </button>
         <button class="action-btn delete" (click)="confirmDelete(doc)" title="Delete">
           🗑️ Delete
         </button>

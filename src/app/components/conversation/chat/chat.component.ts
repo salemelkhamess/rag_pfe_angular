@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ConversationService, Conversation, Message, StreamCallbacks, SourceReference } from '../../../core/services/conversation.service';
 import { LlmService, ProviderInfo } from '../../../core/services/llm.service';
+import { DocumentService } from '../../../core/services/document.service';
 
 @Component({
   selector: 'app-chat',
@@ -14,6 +15,7 @@ import { LlmService, ProviderInfo } from '../../../core/services/llm.service';
 })
 export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
   private conversationService = inject(ConversationService);
+  private documentService = inject(DocumentService);
   private llmService = inject(LlmService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
@@ -26,11 +28,17 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
   loading = signal(true);
   sending = signal(false);
   isStreaming = signal(false);
+  isListening = signal(false);
   inputMessage = '';
   newConversationTitle = '';
   isNewConversation = signal(false);
   private shouldScroll = false;
   private streamController: AbortController | null = null;
+  private recognition: any = null;
+  private inputBeforeVoice = '';
+
+  readonly voiceSupported = typeof window !== 'undefined' &&
+    ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window);
 
   readonly STREAMING_ID = '__streaming__';
 
@@ -263,20 +271,78 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
     try {
       const parsed = JSON.parse(sources);
       if (!Array.isArray(parsed)) return [];
-      return parsed.map((s: any) =>
+      const list: SourceReference[] = parsed.map((s: any) =>
         typeof s === 'string'
           ? { documentName: s }
           : { documentName: s.documentName, pageNumber: s.pageNumber, chunkIndex: s.chunkIndex, score: s.score, documentId: s.documentId }
       );
+      // Deduplicate by documentId (or documentName) — keep highest score
+      const seen = new Map<string, SourceReference>();
+      for (const src of list) {
+        const key = src.documentId ?? src.documentName;
+        const existing = seen.get(key);
+        if (!existing || (src.score ?? 0) > (existing.score ?? 0)) {
+          seen.set(key, src);
+        }
+      }
+      return Array.from(seen.values()).sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
     } catch {
       return [];
     }
+  }
+
+  getSourceIcon(name: string | undefined): string {
+    const lower = (name ?? '').toLowerCase();
+    if (lower.endsWith('.pdf')) return '📕';
+    if (lower.endsWith('.docx') || lower.endsWith('.doc')) return '📘';
+    if (lower.endsWith('.xlsx') || lower.endsWith('.xls')) return '📗';
+    if (lower.endsWith('.txt')) return '📄';
+    return '📄';
   }
 
   formatSource(src: SourceReference): string {
     let label = src.documentName;
     if (src.pageNumber != null) label += ` — p. ${src.pageNumber}`;
     return label;
+  }
+
+  openSource(src: SourceReference): void {
+    if (src.documentId) {
+      this.openDocumentById(src.documentId, src.documentName ?? 'document');
+    } else {
+      // Fallback : chercher le document par son nom
+      this.documentService.getDocuments(0, 100).subscribe({
+        next: (page) => {
+          const found = page.content.find(d =>
+            d.name.toLowerCase() === (src.documentName ?? '').toLowerCase() ||
+            d.name.toLowerCase().includes((src.documentName ?? '').toLowerCase())
+          );
+          if (found) {
+            this.openDocumentById(found.id, found.name);
+          } else {
+            alert(`Document "${src.documentName}" introuvable.`);
+          }
+        },
+        error: () => alert('Impossible de récupérer la liste des documents.')
+      });
+    }
+  }
+
+  private openDocumentById(id: string, name: string): void {
+    this.documentService.previewDocument(id).subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        const win = window.open(url, '_blank');
+        setTimeout(() => URL.revokeObjectURL(url), 15_000);
+        if (!win) {
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = name;
+          a.click();
+        }
+      },
+      error: () => alert(`Impossible d'ouvrir le document "${name}".`)
+    });
   }
 
   formatTime(ms: number | undefined): string {
@@ -298,7 +364,59 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
     } catch {}
   }
 
+  toggleVoice(): void {
+    if (this.isListening()) {
+      this.recognition?.stop();
+      return;
+    }
+
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    this.recognition = new SpeechRecognition();
+    this.recognition.lang = 'fr-FR';
+    this.recognition.interimResults = true;
+    this.recognition.continuous = false;
+    this.recognition.maxAlternatives = 1;
+
+    this.inputBeforeVoice = this.inputMessage;
+
+    this.recognition.onstart = () => this.isListening.set(true);
+
+    this.recognition.onresult = (event: any) => {
+      let interimTranscript = '';
+      let finalTranscript = '';
+
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const t = event.results[i][0].transcript;
+        if (event.results[i].isFinal) finalTranscript += t;
+        else interimTranscript += t;
+      }
+
+      const base = this.inputBeforeVoice;
+      const sep = base && !base.endsWith(' ') ? ' ' : '';
+
+      if (finalTranscript) {
+        this.inputMessage = base + sep + finalTranscript.trim();
+        this.inputBeforeVoice = this.inputMessage;
+      } else if (interimTranscript) {
+        this.inputMessage = base + sep + interimTranscript;
+      }
+    };
+
+    this.recognition.onend = () => {
+      this.isListening.set(false);
+      this.recognition = null;
+    };
+
+    this.recognition.onerror = () => {
+      this.isListening.set(false);
+      this.recognition = null;
+    };
+
+    this.recognition.start();
+  }
+
   ngOnDestroy(): void {
     this.streamController?.abort();
+    this.recognition?.stop();
   }
 }

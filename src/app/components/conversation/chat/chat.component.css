@@ -309,6 +309,23 @@
   flex-shrink: 0;
   cursor: help;
 }
+.source-clickable {
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.source-clickable:hover {
+  background: #eff6ff;
+  border-color: #3b82f6;
+}
+.source-clickable:hover .source-name { color: #2563eb; text-decoration: underline; }
+.source-open-icon {
+  flex-shrink: 0;
+  color: #93c5fd;
+  display: flex;
+  align-items: center;
+  transition: color 0.15s;
+}
+.source-clickable:hover .source-open-icon { color: #3b82f6; }
 
 /* Feedback */
 .feedback-row {
@@ -488,6 +505,70 @@
 }
 .send-btn:hover:not(:disabled) { background: #1d4ed8; transform: scale(1.05); }
 .send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Voice / Mic button */
+.mic-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 2px solid #e2e8f0;
+  background: white;
+  border-radius: 12px;
+  cursor: pointer;
+  color: #64748b;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.mic-btn:hover:not(:disabled) {
+  border-color: #3b82f6;
+  color: #3b82f6;
+  background: #eff6ff;
+}
+.mic-btn.mic-active {
+  border-color: #ef4444;
+  background: #fef2f2;
+  color: #ef4444;
+  animation: mic-pulse 1.4s ease-in-out infinite;
+}
+.mic-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.listening-border {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12) !important;
+}
+
+/* Mic button inside the new-conversation form textarea */
+.textarea-voice-wrap {
+  position: relative;
+}
+.textarea-voice-wrap .form-control {
+  padding-right: 2.75rem;
+}
+.mic-btn-form {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.5rem;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+.mic-btn-form:hover { color: #3b82f6; background: #eff6ff; }
+.mic-btn-form.mic-active { color: #ef4444; animation: mic-pulse 1.4s ease-in-out infinite; }
+
+@keyframes mic-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.35); }
+  50%       { box-shadow: 0 0 0 7px rgba(239, 68, 68, 0); }
+}
 
 /* Streaming cursor */
 .stream-cursor {

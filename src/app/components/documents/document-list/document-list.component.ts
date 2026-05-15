@@ -20,6 +20,7 @@ export class DocumentListComponent implements OnInit, OnDestroy {
   readonly loading = signal(true);
   readonly totalPages = signal(0);
   readonly totalElements = signal(0);
+  readonly reindexingId = signal<string | null>(null);
 
   selectedDocumentForPreview = signal<Document | null>(null);
   showPreview = signal(false);
@@ -135,6 +136,24 @@ export class DocumentListComponent implements OnInit, OnDestroy {
       },
       error: (error: unknown) => {
         console.error('Download error:', error);
+      }
+    });
+  }
+
+  reindexDocument(doc: Document): void {
+    if (this.reindexingId()) return;
+    this.reindexingId.set(doc.id);
+    this.documentService.reindexDocument(doc.id).subscribe({
+      next: () => {
+        this.documents.update(docs =>
+          docs.map(d => d.id === doc.id ? { ...d, status: 'PENDING' } : d)
+        );
+        this.reindexingId.set(null);
+      },
+      error: (err) => {
+        console.error('Re-index error:', err);
+        alert('Erreur lors du re-indexage.');
+        this.reindexingId.set(null);
       }
     });
   }
