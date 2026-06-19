@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { DocumentService, Document } from '../../core/services/document.service';
-import { ConversationService, Conversation } from '../../core/services/conversation.service';
+import { ConversationService, Conversation, ConversationStats, ProviderStat, ModelStat } from '../../core/services/conversation.service';
 import { CategoryService } from '../../core/services/category.service';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
@@ -24,6 +24,7 @@ export class DashbordComponent implements OnInit {
   categoryCount = signal(0);
   recentDocuments = signal<Document[]>([]);
   recentConversations = signal<Conversation[]>([]);
+  llmStats = signal<ConversationStats | null>(null);
 
   stats = signal([
     { title: 'Documents', value: '—', icon: '📄', color: '#667eea', link: '/documents' },
@@ -55,7 +56,8 @@ export class DashbordComponent implements OnInit {
       docs: this.documentService.getDocuments(0, 5).pipe(catchError(() => of(null))),
       convs: this.conversationService.getConversations(0, 5).pipe(catchError(() => of(null))),
       cats: this.categoryService.getAllCategories().pipe(catchError(() => of(null))),
-    }).subscribe(({ docs, convs, cats }) => {
+      llm: this.conversationService.getStats().pipe(catchError(() => of(null))),
+    }).subscribe(({ docs, convs, cats, llm }) => {
       const docTotal = docs?.totalElements ?? 0;
       const convTotal = convs?.totalCount ?? 0;
       const catTotal = Array.isArray(cats) ? cats.length : 0;
@@ -65,6 +67,7 @@ export class DashbordComponent implements OnInit {
       this.categoryCount.set(catTotal);
       this.recentDocuments.set(docs?.content ?? []);
       this.recentConversations.set(convs?.conversations ?? []);
+      if (llm) this.llmStats.set(llm);
 
       this.stats.set([
         { title: 'Documents', value: this.formatCount(docTotal), icon: '📄', color: '#667eea', link: '/documents' },
@@ -123,7 +126,47 @@ export class DashbordComponent implements OnInit {
     return new Date(date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
   }
 
+  get isAdmin(): boolean {
+    const roles: string[] = this.currentUser?.roles ?? [];
+    return roles.includes('admin');
+  }
+
   get barMax(): number {
     return Math.max(...this.chartData.queries);
+  }
+
+  formatTokens(n: number | null | undefined): string {
+    if (n == null) return '—';
+    if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + 'M';
+    if (n >= 1_000) return (n / 1_000).toFixed(1) + 'k';
+    return n.toString();
+  }
+
+  formatMs(ms: number | null | undefined): string {
+    if (ms == null) return '—';
+    if (ms >= 1000) return (ms / 1000).toFixed(1) + 's';
+    return Math.round(ms) + 'ms';
+  }
+
+  topUserTokenMax(): number {
+    const top = this.llmStats()?.topUsersByTokens ?? [];
+    return Math.max(1, ...top.map(u => u.tokensUsed ?? 0));
+  }
+
+  agentTypeEntries(): { key: string; value: number }[] {
+    const dist = this.llmStats()?.agentTypeDistribution ?? {};
+    return Object.entries(dist).map(([key, value]) => ({ key, value: value as number }));
+  }
+
+  agentTypeTotal(): number {
+    return Object.values(this.llmStats()?.agentTypeDistribution ?? {}).reduce((a, b) => a + (b as number), 0) || 1;
+  }
+
+  providerMax(): number {
+    return Math.max(1, ...(this.llmStats()?.providerStats ?? []).map(p => p.messageCount));
+  }
+
+  modelMax(): number {
+    return Math.max(1, ...(this.llmStats()?.modelStats ?? []).map(m => m.messageCount));
   }
 }

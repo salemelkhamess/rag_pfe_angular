@@ -193,6 +193,317 @@
 
     </div>
 
+    <!-- ── LLM / Token Statistics (admin only) ── -->
+    @if (isAdmin) {
+    <div class="llm-section">
+
+      <!-- Section title -->
+      <div class="section-title-row">
+        <div class="section-title-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/>
+            <line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/>
+          </svg>
+        </div>
+        <h2 class="section-title">Statistiques LLM & Tokens</h2>
+      </div>
+
+      <!-- Token KPI row -->
+      <div class="token-kpi-grid">
+
+        <div class="token-kpi-card navy-border">
+          <div class="tkpi-icon navy-bg">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
+            </svg>
+          </div>
+          <div class="tkpi-body">
+            <div class="tkpi-value">{{ formatTokens(llmStats()?.totalTokensUsed) }}</div>
+            <div class="tkpi-label">Tokens totaux consommés</div>
+            <div class="tkpi-sub">Tous temps confondus</div>
+          </div>
+        </div>
+
+        <div class="token-kpi-card gold-border">
+          <div class="tkpi-icon gold-bg">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            </svg>
+          </div>
+          <div class="tkpi-body">
+            <div class="tkpi-value">{{ formatTokens(llmStats()?.tokensLast7Days) }}</div>
+            <div class="tkpi-label">Tokens (7 derniers jours)</div>
+            <div class="tkpi-sub">{{ llmStats()?.messagesLast7Days ?? 0 }} messages envoyés</div>
+          </div>
+        </div>
+
+        <div class="token-kpi-card teal-border">
+          <div class="tkpi-icon teal-bg">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 20V10M12 20V4M6 20v-6"/>
+            </svg>
+          </div>
+          <div class="tkpi-body">
+            <div class="tkpi-value">{{ formatTokens(llmStats()?.avgTokensPerMessage) }}</div>
+            <div class="tkpi-label">Tokens moy. / réponse</div>
+            <div class="tkpi-sub">{{ llmStats()?.totalMessages ?? 0 }} messages au total</div>
+          </div>
+        </div>
+
+        <div class="token-kpi-card purple-border">
+          <div class="tkpi-icon purple-bg">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+          </div>
+          <div class="tkpi-body">
+            <div class="tkpi-value">{{ formatMs(llmStats()?.avgProcessingTimeMs) }}</div>
+            <div class="tkpi-label">Temps de réponse moyen</div>
+            <div class="tkpi-sub">Latence LLM (assistant)</div>
+          </div>
+        </div>
+
+        <div class="token-kpi-card navy-border">
+          <div class="tkpi-icon navy-bg">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+          </div>
+          <div class="tkpi-body">
+            <div class="tkpi-value">{{ llmStats()?.conversationsToday ?? '—' }}</div>
+            <div class="tkpi-label">Conversations aujourd'hui</div>
+            <div class="tkpi-sub">{{ llmStats()?.totalConversations ?? 0 }} au total</div>
+          </div>
+        </div>
+
+        <div class="token-kpi-card gold-border">
+          <div class="tkpi-icon gold-bg">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+          </div>
+          <div class="tkpi-body">
+            <div class="tkpi-value">{{ llmStats()?.topUsersByTokens?.length ?? '—' }}</div>
+            <div class="tkpi-label">Utilisateurs actifs</div>
+            <div class="tkpi-sub">Ayant consommé des tokens</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Row 1: Top users + Agent type distribution -->
+      <div class="llm-data-row">
+
+        <!-- Top users by token usage -->
+        <div class="llm-card">
+          <div class="llm-card-head">
+            <div class="dch-left">
+              <div class="dch-icon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                  <circle cx="9" cy="7" r="4"/>
+                </svg>
+              </div>
+              <h3>Top utilisateurs — tokens consommés</h3>
+            </div>
+          </div>
+          @if (!llmStats()?.topUsersByTokens?.length) {
+            <div class="data-empty">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#b8cde6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+              </svg>
+              <p>Aucune donnée disponible — les tokens seront comptés à partir des prochaines conversations.</p>
+            </div>
+          } @else {
+            <div class="top-users-list">
+              @for (user of llmStats()!.topUsersByTokens; track user.userName; let i = $index) {
+                <div class="top-user-row">
+                  <div class="rank-badge" [class]="i === 0 ? 'rank-gold' : i === 1 ? 'rank-silver' : i === 2 ? 'rank-bronze' : 'rank-plain'">
+                    {{ i + 1 }}
+                  </div>
+                  <div class="user-info">
+                    <div class="user-name-cell">{{ user.userName }}</div>
+                    <div class="user-meta-cell">{{ user.messageCount }} messages · {{ user.conversationCount }} conversations</div>
+                  </div>
+                  <div class="token-bar-wrap">
+                    <div class="token-bar-track">
+                      <div class="token-bar-fill" [style.width.%]="(user.tokensUsed / topUserTokenMax()) * 100"></div>
+                    </div>
+                    <span class="token-count-label">{{ formatTokens(user.tokensUsed) }}</span>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Agent type distribution -->
+        <div class="llm-card">
+          <div class="llm-card-head">
+            <div class="dch-left">
+              <div class="dch-icon gold-bg">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                </svg>
+              </div>
+              <h3>Utilisation par type d'agent</h3>
+            </div>
+          </div>
+          @if (!agentTypeEntries().length) {
+            <div class="data-empty">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#b8cde6" stroke-width="1.5">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+              </svg>
+              <p>Aucune conversation enregistrée.</p>
+            </div>
+          } @else {
+            <div class="agent-dist-list">
+              @for (entry of agentTypeEntries(); track entry.key; let i = $index) {
+                <div class="agent-dist-row">
+                  <div class="agent-name-cell">
+                    <span class="agent-dot" [class]="'dot-' + (i % 4)"></span>
+                    <span class="agent-key">{{ entry.key }}</span>
+                  </div>
+                  <div class="agent-bar-wrap">
+                    <div class="agent-bar-track">
+                      <div class="agent-bar-fill" [class]="'fill-' + (i % 4)"
+                           [style.width.%]="(entry.value / agentTypeTotal()) * 100"></div>
+                    </div>
+                    <span class="agent-count">{{ entry.value }}</span>
+                    <span class="agent-pct">({{ ((entry.value / agentTypeTotal()) * 100).toFixed(0) }}%)</span>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+      </div>
+
+      <!-- Row 2: Provider table + Model table -->
+      <div class="llm-data-row">
+
+        <!-- Provider stats table -->
+        <div class="llm-card">
+          <div class="llm-card-head">
+            <div class="dch-left">
+              <div class="dch-icon teal-bg">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/>
+                  <line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/>
+                </svg>
+              </div>
+              <h3>Providers LLM utilisés</h3>
+            </div>
+          </div>
+          @if (!llmStats()?.providerStats?.length) {
+            <div class="data-empty">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#b8cde6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/>
+              </svg>
+              <p>Aucun provider détecté — disponible après les prochaines conversations.</p>
+            </div>
+          } @else {
+            <div class="table-wrap">
+              <table class="llm-table">
+                <thead>
+                  <tr>
+                    <th>Provider</th>
+                    <th>Requêtes</th>
+                    <th>Tokens</th>
+                    <th>Usage</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (p of llmStats()!.providerStats; track p.provider; let i = $index) {
+                    <tr>
+                      <td>
+                        <div class="provider-name-cell">
+                          <span class="provider-dot" [class]="'dot-' + (i % 4)"></span>
+                          <strong>{{ p.provider }}</strong>
+                        </div>
+                      </td>
+                      <td class="num-cell">{{ p.messageCount }}</td>
+                      <td class="num-cell">{{ formatTokens(p.tokensUsed) }}</td>
+                      <td>
+                        <div class="mini-bar-track">
+                          <div class="mini-bar-fill" [class]="'fill-' + (i % 4)"
+                               [style.width.%]="(p.messageCount / providerMax()) * 100"></div>
+                        </div>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+
+        <!-- Model stats table -->
+        <div class="llm-card">
+          <div class="llm-card-head">
+            <div class="dch-left">
+              <div class="dch-icon purple-bg">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="3"/>
+                  <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+                </svg>
+              </div>
+              <h3>Modèles LLM les plus utilisés</h3>
+            </div>
+          </div>
+          @if (!llmStats()?.modelStats?.length) {
+            <div class="data-empty">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#b8cde6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83"/>
+              </svg>
+              <p>Aucun modèle détecté — disponible après les prochaines conversations.</p>
+            </div>
+          } @else {
+            <div class="table-wrap">
+              <table class="llm-table">
+                <thead>
+                  <tr>
+                    <th>Modèle</th>
+                    <th>Requêtes</th>
+                    <th>Tokens</th>
+                    <th>Usage</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (m of llmStats()!.modelStats; track m.model; let i = $index) {
+                    <tr>
+                      <td>
+                        <div class="provider-name-cell">
+                          <span class="provider-dot" [class]="'dot-' + (i % 4)"></span>
+                          <span class="model-name">{{ m.model }}</span>
+                        </div>
+                      </td>
+                      <td class="num-cell">{{ m.messageCount }}</td>
+                      <td class="num-cell">{{ formatTokens(m.tokensUsed) }}</td>
+                      <td>
+                        <div class="mini-bar-track">
+                          <div class="mini-bar-fill" [class]="'fill-' + (i % 4)"
+                               [style.width.%]="(m.messageCount / modelMax()) * 100"></div>
+                        </div>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+
+      </div>
+    </div>
+    } <!-- /isAdmin -->
+
     <!-- ── Data tables ── -->
     <div class="data-row">
 

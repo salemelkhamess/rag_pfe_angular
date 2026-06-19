@@ -56,6 +56,40 @@ export interface ConversationListResponse {
   totalPages: number;
 }
 
+export interface UserTokenStat {
+  userName: string;
+  tokensUsed: number;
+  messageCount: number;
+  conversationCount: number;
+}
+
+export interface ProviderStat {
+  provider: string;
+  messageCount: number;
+  tokensUsed: number;
+}
+
+export interface ModelStat {
+  model: string;
+  messageCount: number;
+  tokensUsed: number;
+}
+
+export interface ConversationStats {
+  totalConversations: number;
+  totalMessages: number;
+  totalTokensUsed: number;
+  avgTokensPerMessage: number | null;
+  avgProcessingTimeMs: number | null;
+  conversationsToday: number;
+  messagesLast7Days: number;
+  tokensLast7Days: number;
+  topUsersByTokens: UserTokenStat[];
+  agentTypeDistribution: Record<string, number>;
+  providerStats: ProviderStat[];
+  modelStats: ModelStat[];
+}
+
 export interface CreateConversationRequest {
   title: string;
   agentType?: string;
@@ -88,6 +122,10 @@ export class ConversationService {
   private http = inject(HttpClient);
   private tokenService = inject(TokenService);
   private baseUrl = `${environment.baseApi}/conversations`;
+
+  getStats(): Observable<ConversationStats> {
+    return this.http.get<ConversationStats>(`${this.baseUrl}/stats`);
+  }
 
   createConversation(request: CreateConversationRequest): Observable<Conversation> {
     return this.http.post<Conversation>(this.baseUrl, request);
