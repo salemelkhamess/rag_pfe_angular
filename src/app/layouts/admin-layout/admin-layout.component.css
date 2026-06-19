@@ -1,28 +1,26 @@
 .admin-layout {
   min-height: 100vh;
-  background: #f5f5f5;
+  background: #f3f2ee;
 }
 
 .main-content {
-  margin-left: 260px;
-  transition: all 0.3s ease;
+  margin-left: 240px;
+  transition: margin-left 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   min-height: 100vh;
 }
 
 .main-content.sidebar-collapsed {
-  margin-left: 70px;
+  margin-left: 68px;
 }
 
-/* Header fixed; align with sidebar width when layout toggles (menu burger / collapse) */
 :host ::ng-deep .main-content.sidebar-collapsed app-header .header {
-  left: 70px;
+  left: 68px;
 }
 
 .content {
-  padding: 90px 30px 30px 30px;
+  padding: 88px 30px 30px 30px;
 }
 
-/* Responsive */
 @media (max-width: 768px) {
   .main-content {
     margin-left: 0;
@@ -33,6 +31,6 @@
   }
 
   .content {
-    padding: 80px 15px 15px 15px;
+    padding: 76px 16px 16px 16px;
   }
 }

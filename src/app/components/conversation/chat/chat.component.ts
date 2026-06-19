@@ -4,12 +4,13 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ConversationService, Conversation, Message, StreamCallbacks, SourceReference } from '../../../core/services/conversation.service';
 import { LlmService, ProviderInfo } from '../../../core/services/llm.service';
+import { NgSelectModule } from '@ng-select/ng-select';
 import { DocumentService } from '../../../core/services/document.service';
 
 @Component({
   selector: 'app-chat',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, DecimalPipe],
+  imports: [CommonModule, FormsModule, RouterLink, DecimalPipe, NgSelectModule],
   templateUrl: './chat.component.html',
   styleUrls: ['./chat.component.css']
 })

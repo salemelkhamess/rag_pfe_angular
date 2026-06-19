@@ -1,60 +1,91 @@
 <header class="header">
   <div class="header-left">
-    <button class="menu-toggle" (click)="onMenuToggle()">
-      ☰
+    <button class="menu-toggle" (click)="onMenuToggle()" title="Menu">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="3" y1="12" x2="21" y2="12"/>
+        <line x1="3" y1="6"  x2="21" y2="6"/>
+        <line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
     </button>
-    <h1 class="page-title">Tableau de bord</h1>
+    <div class="breadcrumb">
+      <span class="breadcrumb-app">RAG Admin</span>
+      <span class="breadcrumb-sep">/</span>
+      <span class="breadcrumb-page">Tableau de bord</span>
+    </div>
   </div>
 
   <div class="header-right">
+
+    <!-- Notifications -->
     <div class="notification-dropdown">
-      <button class="icon-btn" (click)="toggleNotifications()">
-        🔔
-        <span class="badge">{{ notifications.length }}</span>
+      <button class="icon-btn" (click)="toggleNotifications()" title="Notifications">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+        </svg>
+        <span class="badge" *ngIf="notifications.length">{{ notifications.length }}</span>
       </button>
 
-      <div class="dropdown-menu" *ngIf="showNotifications">
+      <div class="dropdown-menu notif-menu" *ngIf="showNotifications">
         <div class="dropdown-header">
           <h3>Notifications</h3>
-          <button class="mark-all">Tout marquer comme lu</button>
+          <button class="mark-all">Tout lire</button>
         </div>
         <div class="dropdown-content">
           <div *ngFor="let notif of notifications" class="notification-item">
             <div class="notification-message">{{ notif.message }}</div>
             <div class="notification-time">{{ notif.time }}</div>
           </div>
+          <div *ngIf="notifications.length === 0" class="notif-empty">Aucune notification</div>
         </div>
       </div>
     </div>
 
+    <!-- User menu -->
     <div class="user-dropdown">
       <button class="user-btn" (click)="toggleUserMenu()" [disabled]="isLoading">
-        <span class="user-avatar">{{ user.avatar }}</span>
-        <span class="user-name">{{ user.name }}</span>
-        <span class="dropdown-arrow">▼</span>
+        <span class="user-avatar-chip">{{ user.avatar }}</span>
+        <span class="user-name-text">{{ user.name }}</span>
+        <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
       </button>
 
-      <div class="dropdown-menu" *ngIf="showUserMenu">
-        <div class="user-info">
-          <div class="user-avatar-large">{{ user.avatar }}</div>
+      <div class="dropdown-menu user-menu" *ngIf="showUserMenu">
+        <div class="user-info-panel">
+          <div class="user-avatar-lg">{{ user.avatar }}</div>
           <div class="user-details">
-            <div class="user-name-large">{{ user.name }}</div>
-            <div class="user-email">{{ user.email }}</div>
+            <div class="user-name-lg">{{ user.name }}</div>
+            <div class="user-email-sm">{{ user.email }}</div>
           </div>
         </div>
-        <div class="dropdown-divider"></div>
+        <div class="menu-divider"></div>
         <a href="javascript:void(0)" class="dropdown-item" (click)="goToProfile()">
-          👤 Mon profil
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+          Mon profil
         </a>
         <a href="javascript:void(0)" class="dropdown-item" (click)="goToSettings()">
-          ⚙️ Paramètres
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/>
+            <line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/>
+          </svg>
+          Paramétrage
         </a>
-        <div class="dropdown-divider"></div>
+        <div class="menu-divider"></div>
         <a href="javascript:void(0)" class="dropdown-item logout-item" (click)="logout()">
-          <span *ngIf="!isLoading">🚪 Déconnexion</span>
-          <span *ngIf="isLoading" class="spinner">⏳ Déconnexion...</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+          <span *ngIf="!isLoading">Déconnexion</span>
+          <span *ngIf="isLoading">Déconnexion...</span>
         </a>
       </div>
     </div>
+
   </div>
 </header>

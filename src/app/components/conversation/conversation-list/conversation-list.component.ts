@@ -20,12 +20,12 @@ export class ConversationListComponent implements OnInit {
   pageSize = 20;
   totalPages = signal(0);
   totalCount = signal(0);
-  searchTerm = '';
+  searchTerm = signal('');
   showDeleteModal = signal(false);
   selectedConversation = signal<Conversation | null>(null);
 
   filteredConversations = computed(() => {
-    const term = this.searchTerm.toLowerCase();
+    const term = this.searchTerm().toLowerCase();
     if (!term) return this.conversations();
     return this.conversations().filter(conv =>
       conv.title?.toLowerCase().includes(term) ||

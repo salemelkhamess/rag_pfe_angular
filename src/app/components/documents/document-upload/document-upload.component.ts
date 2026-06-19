@@ -6,12 +6,13 @@ import { Router } from '@angular/router';
 import { Subject, Subscription, timer } from 'rxjs';
 import { finalize, retry } from 'rxjs/operators';
 import { DocumentService } from '../../../core/services/document.service';
-import {Category, CategoryService} from '../../../core/services/category.service';
+import { Category, CategoryService } from '../../../core/services/category.service';
+import { NgSelectModule } from '@ng-select/ng-select';
 
 @Component({
   selector: 'app-document-upload',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, NgSelectModule],
   templateUrl: './document-upload.component.html',
   styleUrls: ['./document-upload.component.css']
 })

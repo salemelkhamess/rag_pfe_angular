@@ -1,0 +1,200 @@
+<div class="form-page">
+
+  @if (loading()) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Chargement...</p>
+    </div>
+  }
+
+  @if (!loading()) {
+    <div class="form-card">
+
+      <!-- Hero -->
+      <div class="form-hero">
+        <div class="hero-avatar">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="2" width="20" height="8" rx="2" ry="2"/>
+            <rect x="2" y="14" width="20" height="8" rx="2" ry="2"/>
+            <line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/>
+          </svg>
+        </div>
+        <h2 class="hero-title">{{ isEditMode() ? 'Modifier le provider' : 'Ajouter un provider' }}</h2>
+        <p class="hero-sub">Configurez un fournisseur LLM et ses modèles associés.</p>
+      </div>
+
+      <!-- Body -->
+      <div class="form-body">
+
+        @if (error()) {
+          <div class="alert-error">{{ error() }}</div>
+        }
+
+        <!-- Provider form -->
+        <form (ngSubmit)="onSubmitProvider()" class="provider-form">
+
+          <div class="section-label">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            Informations du provider
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="code">Code <span class="req">*</span></label>
+              <input id="code" class="form-control" [(ngModel)]="providerForm.code" name="code" placeholder="openai, ollama..." required />
+            </div>
+            <div class="form-group">
+              <label for="name">Nom <span class="req">*</span></label>
+              <input id="name" class="form-control" [(ngModel)]="providerForm.name" name="name" placeholder="OpenAI" required />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="displayName">Nom affiché</label>
+              <input id="displayName" class="form-control" [(ngModel)]="providerForm.displayName" name="displayName" />
+            </div>
+            <div class="form-group">
+              <label for="baseUrl">URL de base</label>
+              <input id="baseUrl" class="form-control" [(ngModel)]="providerForm.baseUrl" name="baseUrl" placeholder="https://api.openai.com/v1" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="apiKey">Clé API</label>
+            <input id="apiKey" type="password" class="form-control" [(ngModel)]="providerForm.apiKey" name="apiKey" autocomplete="new-password" placeholder="sk-..." />
+          </div>
+
+          <div class="form-group">
+            <label for="description">Description</label>
+            <textarea id="description" class="form-control" rows="2" [(ngModel)]="providerForm.description" name="description" placeholder="Description du provider..."></textarea>
+          </div>
+
+          <div class="toggle-group">
+            <label class="toggle-label">
+              <span class="toggle-track">
+                <input type="checkbox" [(ngModel)]="providerForm.active" name="active" class="toggle-input" />
+                <span class="toggle-thumb"></span>
+              </span>
+              Provider actif
+            </label>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn-cancel" (click)="cancel()">Annuler</button>
+            <button type="submit" class="btn-submit" [disabled]="submitting()">
+              <svg *ngIf="!submitting()" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              {{ submitting() ? 'Enregistrement...' : (isEditMode() ? 'Enregistrer' : 'Créer le provider') }}
+            </button>
+          </div>
+        </form>
+
+        <!-- Models section (edit mode only) -->
+        @if (isEditMode()) {
+          <div class="section-divider"></div>
+
+          <div class="section-label">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>
+            </svg>
+            Modèles associés
+          </div>
+
+          <form class="model-inline-form" (ngSubmit)="addModel()">
+            <div class="form-row three-col">
+              <div class="form-group">
+                <label>Nom du modèle <span class="req">*</span></label>
+                <input class="form-control" [(ngModel)]="modelForm.name" name="modelName" placeholder="GPT-4o mini" />
+              </div>
+              <div class="form-group">
+                <label>Model ID <span class="req">*</span></label>
+                <input class="form-control" [(ngModel)]="modelForm.modelId" name="modelId" placeholder="gpt-4o-mini" />
+              </div>
+              <div class="form-group">
+                <label>Contexte (tokens)</label>
+                <input type="number" class="form-control" [(ngModel)]="modelForm.contextWindow" name="contextWindow" placeholder="128000" />
+              </div>
+            </div>
+            <div class="toggle-row">
+              <label class="toggle-label">
+                <span class="toggle-track">
+                  <input type="checkbox" [(ngModel)]="modelForm.isDefault" name="isDefault" class="toggle-input" />
+                  <span class="toggle-thumb"></span>
+                </span>
+                Modèle par défaut
+              </label>
+              <label class="toggle-label">
+                <span class="toggle-track">
+                  <input type="checkbox" [(ngModel)]="modelForm.active" name="modelActive" class="toggle-input" />
+                  <span class="toggle-thumb"></span>
+                </span>
+                Actif
+              </label>
+              <button type="submit" class="btn-add-model">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                Ajouter le modèle
+              </button>
+            </div>
+          </form>
+
+          @if (models().length === 0) {
+            <p class="hint">Aucun modèle. Ajoutez au moins un modèle pour ce provider.</p>
+          } @else {
+            <div class="model-table-wrap">
+              <table class="models-table">
+                <thead>
+                  <tr>
+                    <th>Nom</th>
+                    <th>Model ID</th>
+                    <th>Contexte</th>
+                    <th>Défaut</th>
+                    <th>État</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (model of models(); track model.id) {
+                    <tr>
+                      <td class="model-name-cell">{{ model.name }}</td>
+                      <td><code class="model-id-chip">{{ model.modelId }}</code></td>
+                      <td class="muted-cell">{{ model.contextWindow ? (model.contextWindow | number) + ' tok' : '—' }}</td>
+                      <td>
+                        @if (model.isDefault) {
+                          <span class="default-badge">Défaut</span>
+                        } @else {
+                          <span class="muted-cell">—</span>
+                        }
+                      </td>
+                      <td>
+                        <span class="model-status" [class]="model.active ? 'active' : 'inactive'">
+                          {{ model.active ? 'Actif' : 'Inactif' }}
+                        </span>
+                      </td>
+                      <td class="row-actions">
+                        @if (!model.isDefault) {
+                          <button type="button" class="link-btn" (click)="setDefault(model)">Définir défaut</button>
+                        }
+                        <button type="button" class="link-btn danger" (click)="deleteModel(model)">Supprimer</button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        }
+
+      </div>
+      <!-- /form-body -->
+
+    </div>
+    <!-- /form-card -->
+  }
+
+</div>

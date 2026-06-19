@@ -8,7 +8,8 @@ import {
   UserInfoResponse,
   ApiResponse,
   RegisterRequest,
-  UpdateUserRequest
+  UpdateUserRequest,
+  ChangePasswordRequest
 } from '../models/auth.models';
 import { TokenService } from './token.service';
 import { environment } from '../../../environments/environment';
@@ -124,6 +125,11 @@ export class AuthService {
         }),
         catchError(this.handleError)
       );
+  }
+
+  changePassword(request: ChangePasswordRequest): Observable<ApiResponse<void>> {
+    return this.http.put<ApiResponse<void>>(`${this.USER_API_URL}/users/me/password`, request)
+      .pipe(catchError(this.handleError));
   }
 
   validateToken(): Observable<ApiResponse<boolean>> {

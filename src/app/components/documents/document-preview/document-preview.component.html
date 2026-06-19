@@ -1,39 +1,61 @@
-<div class="preview-modal" (click)="close()">
+<div class="preview-backdrop" (click)="close()">
   <div class="preview-container" (click)="$event.stopPropagation()">
+
+    <!-- Header -->
     <div class="preview-header">
-      <div class="preview-title">
-        <span class="file-icon">{{ getFileIcon() }}</span>
-        <div>
-          <h3>{{ document?.name }}</h3>
-          <p>{{ formatFileSize() }} • {{ document?.mimeType }}</p>
-        </div>
+      <div class="preview-file-icon">{{ getFileIcon() }}</div>
+
+      <div class="preview-file-info">
+        <h3 class="preview-file-name">{{ document?.name }}</h3>
+        <p class="preview-file-meta">{{ formatFileSize() }}&nbsp;&bull;&nbsp;{{ document?.mimeType || 'Fichier' }}</p>
       </div>
 
-      <div class="preview-actions">
-        <button class="action-btn download" (click)="downloadDocument()" title="Download">
-          ⬇️ Download
+      <div class="preview-header-actions">
+        <button class="preview-btn-download" (click)="downloadDocument()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Télécharger
         </button>
-        <button class="action-btn close" (click)="close()" title="Close">
-          ✕
+        <button class="preview-btn-close" (click)="close()" title="Fermer">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
         </button>
       </div>
     </div>
 
+    <!-- Body -->
     <div class="preview-body">
+
       @if (loading()) {
-        <div class="preview-loading">
-          <div class="spinner"></div>
-          <p>Loading preview...</p>
+        <div class="preview-state">
+          <div class="preview-spinner"></div>
+          <p>Chargement de l'aperçu...</p>
         </div>
       }
 
       @if (!loading() && error()) {
-        <div class="preview-error">
-          <div class="error-icon">⚠️</div>
-          <h4>Preview not available</h4>
+        <div class="preview-state preview-error-state">
+          <div class="preview-error-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+          </div>
+          <h4>Aperçu non disponible</h4>
           <p>{{ error() }}</p>
-          <button class="btn-download" (click)="downloadDocument()">
-            Download Document
+          <button class="preview-dl-btn" (click)="downloadDocument()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            Télécharger le document
           </button>
         </div>
       }
@@ -46,15 +68,11 @@
 
       @if (!loading() && !error() && previewData()?.type === 'pdf' && previewData()?.url) {
         <div class="preview-pdf">
-          <object
-            [data]="sanitizeUrl(previewData()!.url!)"
-            type="application/pdf"
-            width="100%"
-            height="100%">
-            <p>
-              PDF preview not supported in this browser.
-              <button class="btn-download" (click)="downloadDocument()">Download PDF</button>
-            </p>
+          <object [data]="sanitizeUrl(previewData()!.url!)" type="application/pdf" width="100%" height="100%">
+            <div class="preview-state">
+              <p>Aperçu PDF non supporté par ce navigateur.</p>
+              <button class="preview-dl-btn" (click)="downloadDocument()">Télécharger le PDF</button>
+            </div>
           </object>
         </div>
       }
@@ -66,13 +84,13 @@
       }
 
       @if (
-        !loading() &&
-        !error() &&
+        !loading() && !error() &&
         (previewData()?.type === 'docx' || previewData()?.type === 'xlsx') &&
         previewData()?.html
-        ) {
+      ) {
         <div class="preview-html" [innerHTML]="sanitizeHtml(previewData()!.html!)"></div>
       }
+
     </div>
   </div>
 </div>

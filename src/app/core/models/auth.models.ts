@@ -9,6 +9,7 @@ export interface RegisterRequest {
   password: string;
   firstName?: string;
   lastName?: string;
+  role?: string;
 }
 
 export interface UpdateUserRequest {
@@ -16,6 +17,11 @@ export interface UpdateUserRequest {
   lastName?: string;
   email?: string;
   username?: string;
+}
+
+export interface ChangePasswordRequest {
+  oldPassword: string;
+  newPassword: string;
 }
 
 export interface AuthResponse {
@@ -27,8 +33,8 @@ export interface UserInfoResponse {
   id: string;
   username: string;
   email: string;
-  firstName: string;
-  lastName: string;
+  firstName?: string;
+  lastName?: string;
   roles: string[];
   enabled: boolean;
   emailVerified: boolean;

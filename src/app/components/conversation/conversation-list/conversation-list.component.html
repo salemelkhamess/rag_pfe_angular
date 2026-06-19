@@ -1,99 +1,156 @@
 <div class="conversations-container">
 
-  <div class="page-header">
-    <div>
-      <h2>Conversations</h2>
-      <p class="subtitle">{{ totalCount() }} conversation(s)</p>
-    </div>
-    <a routerLink="/conversations/new" class="btn-new">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-      </svg>
-      Nouvelle conversation
-    </a>
-  </div>
+  <div class="page-card">
 
-  <!-- Search -->
-  <div class="search-bar">
-    <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-    </svg>
-    <input type="text"
-           [(ngModel)]="searchTerm"
-           placeholder="Rechercher..."
-           class="search-input" />
-  </div>
-
-  <!-- Loading -->
-  @if (loading()) {
-    <div class="loading-state">
-      <div class="spinner"></div>
-      <p>Chargement...</p>
-    </div>
-  }
-
-  <!-- Empty state -->
-  @if (!loading() && filteredConversations().length === 0) {
-    <div class="empty-state">
-      <div class="empty-icon">💬</div>
-      <h3>Aucune conversation</h3>
-      <p>Commencez par poser une question sur vos documents</p>
-      <a routerLink="/conversations/new" class="btn-new">
+    <!-- Card Header -->
+    <div class="page-card-header">
+      <div class="pch-left">
+        <div class="pch-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+        </div>
+        <div class="pch-titles">
+          <h2>Conversations</h2>
+          <span class="pch-count">{{ totalCount() }} conversation{{ totalCount() !== 1 ? 's' : '' }}</span>
+        </div>
+      </div>
+      <a routerLink="/conversations/new" class="btn-primary">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
         Nouvelle conversation
       </a>
     </div>
-  }
 
-  <!-- List -->
-  @if (!loading() && filteredConversations().length > 0) {
-    <div class="conv-list">
-      @for (conv of filteredConversations(); track conv.id) {
-        <div class="conv-card" [routerLink]="['/conversations', conv.id]">
-          <div class="conv-icon">💬</div>
-          <div class="conv-body">
-            <div class="conv-title">{{ conv.title }}</div>
-            @if (conv.summary) {
-              <div class="conv-summary">{{ conv.summary }}</div>
-            }
-            <div class="conv-meta">
-              <span>{{ formatDate(conv.updatedAt || conv.createdAt) }}</span>
-              <span>·</span>
-              <span>{{ conv.messageCount }} messages</span>
-              <span>·</span>
-              <span class="agent-badge">{{ conv.agentType || 'document_qa' }}</span>
-            </div>
-          </div>
-          <button class="del-btn" (click)="$event.stopPropagation(); confirmDelete(conv)" title="Supprimer">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/>
-            </svg>
-          </button>
+    <!-- Toolbar: search -->
+    <div class="card-toolbar">
+      <div class="search-wrapper">
+        <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input type="text"
+               [ngModel]="searchTerm()"
+               (ngModelChange)="searchTerm.set($event)"
+               placeholder="Rechercher dans les conversations..."
+               class="search-input" />
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="card-content">
+
+      @if (loading()) {
+        <div class="loading-state">
+          <div class="spinner"></div>
+          <p>Chargement...</p>
         </div>
       }
-    </div>
-  }
 
-  <!-- Pagination -->
-  @if (totalPages() > 1) {
-    <div class="pagination">
-      <button class="page-btn" (click)="previousPage()" [disabled]="currentPage() === 0">← Précédent</button>
-      <span class="page-info">{{ currentPage() + 1 }} / {{ totalPages() }}</span>
-      <button class="page-btn" (click)="nextPage()" [disabled]="currentPage() + 1 >= totalPages()">Suivant →</button>
+      @if (!loading() && filteredConversations().length === 0) {
+        <div class="empty-state">
+          <div class="empty-illustration">
+            <svg width="38" height="38" viewBox="0 0 64 64" fill="none">
+              <rect x="6" y="8" width="52" height="36" rx="8" fill="#dde8f5" stroke="#b8cde6" stroke-width="1.5"/>
+              <path d="M16 22h32M16 30h20" stroke="#b8cde6" stroke-width="2" stroke-linecap="round"/>
+              <path d="M22 52l4-8h12l4 8" fill="#dde8f5" stroke="#b8cde6" stroke-width="1.5" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <h3>Aucune conversation</h3>
+          <p>Commencez par poser une question sur vos documents</p>
+          <a routerLink="/conversations/new" class="btn-primary">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Nouvelle conversation
+          </a>
+        </div>
+      }
+
+      @if (!loading() && filteredConversations().length > 0) {
+        <div class="conv-list">
+          @for (conv of filteredConversations(); track conv.id) {
+            <div class="conv-card" [routerLink]="['/conversations', conv.id]">
+              <div class="conv-icon-box">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+              </div>
+              <div class="conv-body">
+                <div class="conv-title">{{ conv.title }}</div>
+                @if (conv.summary) {
+                  <div class="conv-summary">{{ conv.summary }}</div>
+                }
+                <div class="conv-meta">
+                  <span class="agent-badge">{{ conv.agentType || 'document_qa' }}</span>
+                  <span class="meta-dot">·</span>
+                  <span>{{ conv.messageCount }} message{{ conv.messageCount !== 1 ? 's' : '' }}</span>
+                </div>
+              </div>
+              <div class="conv-date">{{ formatDate(conv.updatedAt || conv.createdAt) }}</div>
+              <button class="del-btn" (click)="$event.stopPropagation(); confirmDelete(conv)" title="Supprimer">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/>
+                </svg>
+              </button>
+            </div>
+          }
+        </div>
+      }
+
     </div>
-  }
+    <!-- /card-content -->
+
+    <!-- Pagination -->
+    @if (totalPages() > 1) {
+      <div class="card-footer-nav">
+        <button class="page-btn" (click)="previousPage()" [disabled]="currentPage() === 0">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+          Précédent
+        </button>
+        <span class="page-info">Page <strong>{{ currentPage() + 1 }}</strong> / <strong>{{ totalPages() }}</strong></span>
+        <button class="page-btn" (click)="nextPage()" [disabled]="currentPage() + 1 >= totalPages()">
+          Suivant
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </button>
+      </div>
+    }
+
+  </div>
+  <!-- /page-card -->
 
   <!-- Delete modal -->
   @if (showDeleteModal()) {
     <div class="modal-overlay" (click)="cancelDelete()">
       <div class="modal" (click)="$event.stopPropagation()">
-        <h3>Supprimer la conversation</h3>
-        <p>Voulez-vous supprimer <strong>"{{ selectedConversation()?.title }}"</strong> ?<br>
-        <small class="warn">Cette action est irréversible.</small></p>
+        <div class="modal-header">
+          <div class="modal-icon-danger">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+          </div>
+          <div>
+            <h3>Supprimer la conversation</h3>
+            <p class="modal-subtitle">Cette action est irréversible</p>
+          </div>
+        </div>
+        <p class="modal-body-text">Voulez-vous supprimer <strong>« {{ selectedConversation()?.title }} »</strong> ?</p>
         <div class="modal-actions">
           <button class="btn-cancel" (click)="cancelDelete()">Annuler</button>
-          <button class="btn-delete" (click)="deleteConversation()">Supprimer</button>
+          <button class="btn-delete" (click)="deleteConversation()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/>
+            </svg>
+            Supprimer
+          </button>
         </div>
       </div>
     </div>
   }
+
 </div>

@@ -13,9 +13,10 @@ export interface ProviderInfo {
 @Injectable({ providedIn: 'root' })
 export class LlmService {
   private http = inject(HttpClient);
-  private baseUrl = `${environment.baseApi}/llm`;
+  private baseUrl = `${environment.baseApi}/conversations/llm`;
 
+  /** Providers et modèles depuis parametrage-service (via conversation-service). */
   getProviders(): Observable<ProviderInfo[]> {
-    return this.http.get<ProviderInfo[]>(`${this.baseUrl}/models`);
+    return this.http.get<ProviderInfo[]>(`${this.baseUrl}/providers`);
   }
 }

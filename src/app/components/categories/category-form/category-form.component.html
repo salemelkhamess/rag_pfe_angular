@@ -1,120 +1,169 @@
 <!-- src/app/components/categories/category-form/category-form.component.html -->
-<div class="form-container">
-  <div class="form-header">
-    <h2>{{ isEditMode() ? '✏️ Edit Category' : '➕ Create Category' }}</h2>
-    <p>{{ isEditMode() ? 'Update your category information' : 'Add a new category to organize documents' }}</p>
-  </div>
+<div class="form-page">
+  <div class="form-card">
 
-  @if (loading()) {
-    <div class="loading-state">
-      <div class="spinner"></div>
-      <p>Loading...</p>
+    <!-- Hero Header -->
+    <div class="form-hero">
+      <div class="form-hero-icon">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+        </svg>
+      </div>
+      <div>
+        <h2>{{ isEditMode() ? 'Modifier la catégorie' : 'Nouvelle catégorie' }}</h2>
+        <p>{{ isEditMode() ? 'Mettez à jour les informations de la catégorie' : 'Ajoutez une catégorie pour organiser vos documents' }}</p>
+      </div>
     </div>
-  }
 
-  @if (!loading()) {
-    <form (ngSubmit)="onSubmit()" class="category-form">
-      <!-- Error message -->
-      @if (error()) {
-        <div class="alert error">
-          <span>❌</span>
-          <span>{{ error() }}</span>
+    <!-- Loading -->
+    @if (loading()) {
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Chargement...</p>
+      </div>
+    }
+
+    @if (!loading()) {
+      <form (ngSubmit)="onSubmit()" class="form-body">
+
+        <!-- Error -->
+        @if (error()) {
+          <div class="alert-error">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            {{ error() }}
+          </div>
+        }
+
+        <!-- 2-col layout for top fields -->
+        <div class="form-grid">
+          <!-- Name -->
+          <div class="form-group col-full">
+            <label>Nom de la catégorie *</label>
+            <input type="text"
+                   id="name"
+                   [(ngModel)]="formData.name"
+                   name="name"
+                   placeholder="Ex : Contrats, Factures, RH…"
+                   class="form-control"
+                   required>
+          </div>
+
+          <!-- Description -->
+          <div class="form-group col-full">
+            <label>Description</label>
+            <textarea id="description"
+                      [(ngModel)]="formData.description"
+                      name="description"
+                      rows="2"
+                      placeholder="Décrivez brièvement cette catégorie (optionnel)"
+                      class="form-control"></textarea>
+          </div>
+
+          <!-- Parent Category -->
+          <div class="form-group col-half">
+            <label>Catégorie parente</label>
+            <ng-select [(ngModel)]="formData.parentId"
+                       name="parentId"
+                       [searchable]="true"
+                       [clearable]="true"
+                       placeholder="Aucune (catégorie racine)"
+                       class="form-control">
+              <ng-option [value]="null">Aucune (catégorie racine)</ng-option>
+              @for (cat of getAvailableParents(); track cat.id) {
+                <ng-option [value]="cat.id">{{ '—'.repeat(cat.level) }} {{ cat.name }}</ng-option>
+              }
+            </ng-select>
+          </div>
+
+          <!-- Display Order -->
+          <div class="form-group col-half">
+            <label>Ordre d'affichage</label>
+            <input type="number"
+                   id="displayOrder"
+                   [(ngModel)]="formData.displayOrder"
+                   name="displayOrder"
+                   class="form-control"
+                   min="0"
+                   placeholder="0">
+            <span class="field-hint">Les valeurs basses apparaissent en premier</span>
+          </div>
         </div>
-      }
 
-      <!-- Category Name -->
-      <div class="form-group">
-        <label for="name">Category Name *</label>
-        <input type="text"
-               id="name"
-               [(ngModel)]="formData.name"
-               name="name"
-               placeholder="Enter category name"
-               class="form-control"
-               required>
-      </div>
-
-      <!-- Description -->
-      <div class="form-group">
-        <label for="description">Description</label>
-        <textarea id="description"
-                  [(ngModel)]="formData.description"
-                  name="description"
-                  rows="3"
-                  placeholder="Enter a description (optional)"
-                  class="form-control"></textarea>
-      </div>
-
-      <!-- Parent Category -->
-      <div class="form-group">
-        <label for="parentId">Parent Category</label>
-        <select id="parentId"
-                [(ngModel)]="formData.parentId"
-                name="parentId"
-                class="form-control">
-          <option [value]="null">None (Root Category)</option>
-          @for (cat of getAvailableParents(); track cat.id) {
-            <option [value]="cat.id">
-              {{ '—'.repeat(cat.level) }} {{ cat.name }}
-            </option>
-          }
-        </select>
-      </div>
-
-      <!-- Color Selection -->
-      <div class="form-group">
-        <label>Category Color</label>
-        <div class="color-picker">
-          @for (color of colors; track color.value) {
-            <div class="color-option"
-                 [style.backgroundColor]="color.value"
-                 [class.selected]="formData.color === color.value"
-                 (click)="formData.color = color.value">
-            </div>
-          }
+        <!-- Divider -->
+        <div class="section-divider">
+          <span>Apparence</span>
         </div>
-      </div>
 
-      <!-- Icon Selection -->
-      <div class="form-group">
-        <label>Category Icon</label>
-        <div class="icon-picker">
-          @for (icon of icons; track icon) {
-            <div class="icon-option"
-                 [class.selected]="formData.icon === icon"
-                 (click)="formData.icon = icon">
-              {{ icon }}
-            </div>
-          }
+        <!-- Color Picker -->
+        <div class="form-group">
+          <label>Couleur</label>
+          <div class="color-picker">
+            @for (color of colors; track color.value) {
+              <button type="button"
+                      class="color-option"
+                      [style.background]="color.value"
+                      [class.selected]="formData.color === color.value"
+                      (click)="formData.color = color.value"
+                      [title]="color.name || color.value">
+                @if (formData.color === color.value) {
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                }
+              </button>
+            }
+          </div>
         </div>
-      </div>
 
-      <!-- Display Order -->
-      <div class="form-group">
-        <label for="displayOrder">Display Order</label>
-        <input type="number"
-               id="displayOrder"
-               [(ngModel)]="formData.displayOrder"
-               name="displayOrder"
-               class="form-control"
-               min="0">
-        <small>Lower numbers appear first</small>
-      </div>
+        <!-- Icon Picker -->
+        <div class="form-group">
+          <label>Icône</label>
+          <div class="icon-picker">
+            @for (icon of icons; track icon) {
+              <button type="button"
+                      class="icon-option"
+                      [class.selected]="formData.icon === icon"
+                      (click)="formData.icon = icon">
+                {{ icon }}
+              </button>
+            }
+          </div>
+        </div>
 
-      <!-- Form Actions -->
-      <div class="form-actions">
-        <button type="button" class="btn-cancel" (click)="cancel()">
-          Cancel
-        </button>
-        <button type="submit" class="btn-submit" [disabled]="submitting()">
-          @if (submitting()) {
-            <span class="spinner-small"></span>
-            {{ isEditMode() ? 'Updating...' : 'Creating...' }}
-          } @else {
-            {{ isEditMode() ? 'Update Category' : 'Create Category' }}
-          }
-        </button>
-      </div>
-    </form>
-  }
+        <!-- Preview -->
+        <div class="category-preview">
+          <span class="preview-label">Aperçu</span>
+          <div class="preview-badge" [style.background]="formData.color || '#eaf0fb'">
+            {{ formData.icon || '📁' }}
+          </div>
+          <span class="preview-name">{{ formData.name || 'Nom de la catégorie' }}</span>
+        </div>
+
+        <!-- Actions -->
+        <div class="form-actions">
+          <button type="button" class="btn-cancel" (click)="cancel()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+            Annuler
+          </button>
+          <button type="submit" class="btn-submit" [disabled]="submitting()">
+            @if (submitting()) {
+              <span class="spinner-sm"></span>
+              {{ isEditMode() ? 'Enregistrement...' : 'Création...' }}
+            } @else {
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              {{ isEditMode() ? 'Enregistrer' : 'Créer la catégorie' }}
+            }
+          </button>
+        </div>
+
+      </form>
+    }
+
+  </div>
 </div>

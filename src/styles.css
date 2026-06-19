@@ -1,4 +1,6 @@
 /* You can add global styles to this file, and also import other style files */
+@import '@ng-select/ng-select/themes/default.theme.css';
+
 * {
   margin: 0;
   padding: 0;
@@ -44,4 +46,409 @@ body {
 
 .fade-in {
   animation: fadeIn 0.5s ease;
+}
+
+/* ─── Page Card Shell — shared across all list pages ─── */
+.page-card {
+  background: #ffffff;
+  border: 1px solid #e4ddd0;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(18, 60, 105, 0.07);
+}
+
+.page-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.875rem 1.25rem;
+  background: #f6f4ef;
+  border-bottom: 1px solid #e4ddd0;
+}
+
+.pch-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.pch-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: #123c69;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.pch-titles {
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
+  min-width: 0;
+}
+
+.pch-titles h2 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #123c69;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.pch-count {
+  font-size: 0.75rem;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+.card-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid #e4ddd0;
+  background: #ffffff;
+}
+
+.card-content {
+  padding: 1.25rem;
+}
+
+.card-footer-nav {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1.25rem;
+  border-top: 1px solid #e4ddd0;
+  background: #f6f4ef;
+}
+
+/* ─── No padding variant for full-width tables ─── */
+.card-content.no-pad { padding: 0; }
+
+/* ─── Primary button ─── */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.65rem 1.2rem;
+  background: #123c69;
+  color: #ffffff;
+  text-decoration: none;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  font-family: inherit;
+  flex-shrink: 0;
+}
+.btn-primary:hover {
+  background: #0d2d4f;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(18, 60, 105, 0.28);
+  color: #ffffff;
+}
+
+/* ─── Outline button ─── */
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.2rem;
+  border: 1.5px solid #cec5b4;
+  border-radius: 8px;
+  background: transparent;
+  color: #374151;
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+.btn-outline:hover {
+  border-color: #123c69;
+  color: #123c69;
+  background: rgba(18, 60, 105, 0.05);
+}
+
+/* ─── Toolbar search ─── */
+.search-wrapper {
+  position: relative;
+  flex: 1;
+  min-width: 180px;
+}
+.search-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9a7228;
+  pointer-events: none;
+}
+.search-input {
+  width: 100%;
+  padding: 0.65rem 2.3rem 0.65rem 2.4rem;
+  border: 1.5px solid #e4ddd0;
+  border-radius: 8px;
+  background: #f6f4ef;
+  color: #111827;
+  font-size: 0.875rem;
+  font-family: inherit;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  box-sizing: border-box;
+}
+.search-input::placeholder { color: #6b7280; }
+.search-input:focus {
+  outline: none;
+  border-color: #123c69;
+  box-shadow: 0 0 0 3px rgba(18, 60, 105, 0.1);
+  background: #fff;
+}
+.search-clear {
+  position: absolute;
+  right: 0.6rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border: none;
+  border-radius: 50%;
+  background: #e4ddd0;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 0;
+}
+.search-clear:hover { background: #cec5b4; color: #111827; }
+
+/* ─── Pagination ─── */
+.page-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.55rem 1rem;
+  border: 1.5px solid #e4ddd0;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #123c69;
+  font-size: 0.825rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+.page-btn:hover:not(:disabled) {
+  border-color: #123c69;
+  background: #eaf0fb;
+}
+.page-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.page-info {
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+/* ─── Loading & empty states ─── */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 4rem;
+  color: #64748b;
+}
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid #e4ddd0;
+  border-top-color: #123c69;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 4rem 2rem;
+  text-align: center;
+  color: #64748b;
+}
+.empty-state h3 { font-size: 1.1rem; font-weight: 700; color: #1a1a2e; margin: 0; }
+.empty-state p { font-size: 0.875rem; margin: 0; }
+.empty-illustration {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eaf0fb;
+  border-radius: 16px;
+  margin-bottom: 0.5rem;
+}
+
+/* ====================== NG-SELECT CUSTOM THEME ====================== */
+.ng-select {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.ng-select .ng-select-container {
+  min-height: 44px;
+  border: 1.5px solid #e4ddd0;
+  border-radius: 8px;
+  background: #f6f4ef;
+  color: #111827;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  cursor: pointer;
+}
+
+.ng-select .ng-select-container:hover {
+  border-color: #cec5b4;
+}
+
+.ng-select.ng-select-focused .ng-select-container {
+  border-color: #123c69;
+  box-shadow: 0 0 0 3px rgba(18, 60, 105, 0.1);
+  background: #ffffff;
+  outline: none;
+}
+
+.ng-select .ng-select-container .ng-value-container {
+  padding: 0 0.75rem;
+}
+
+.ng-select .ng-select-container .ng-value-container .ng-input > input {
+  color: #111827;
+  font-size: 0.9rem;
+}
+
+.ng-select .ng-select-container .ng-value-container .ng-placeholder {
+  color: #6b7280;
+  font-weight: 400;
+}
+
+.ng-select .ng-select-container .ng-value {
+  color: #111827;
+  font-weight: 600;
+}
+
+/* Arrow */
+.ng-select .ng-arrow-wrapper {
+  padding-right: 0.75rem;
+}
+
+.ng-select .ng-arrow-wrapper .ng-arrow {
+  border-color: #9a7228 transparent transparent;
+  border-width: 5px 4px 0;
+}
+
+.ng-select.ng-select-opened .ng-arrow-wrapper .ng-arrow {
+  border-color: transparent transparent #9a7228;
+  border-width: 0 4px 5px;
+}
+
+/* Clear button */
+.ng-select .ng-clear-wrapper {
+  color: #6b7280;
+}
+
+.ng-select .ng-clear-wrapper:hover .ng-clear {
+  color: #c0392b;
+}
+
+/* Dropdown panel */
+.ng-dropdown-panel {
+  border: 1.5px solid #e4ddd0;
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(18, 60, 105, 0.12), 0 2px 8px rgba(0,0,0,.06);
+  background: #ffffff;
+  margin-top: 4px;
+  overflow: hidden;
+}
+
+.ng-dropdown-panel .ng-dropdown-panel-items .ng-option {
+  padding: 0.65rem 1rem;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: #374151;
+  transition: background 0.15s ease, color 0.15s ease;
+  border-bottom: 1px solid #f3f2ee;
+}
+
+.ng-dropdown-panel .ng-dropdown-panel-items .ng-option:last-child {
+  border-bottom: none;
+}
+
+.ng-dropdown-panel .ng-dropdown-panel-items .ng-option.ng-option-marked {
+  background: #eaf0fb;
+  color: #123c69;
+}
+
+.ng-dropdown-panel .ng-dropdown-panel-items .ng-option.ng-option-selected {
+  background: #123c69;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.ng-dropdown-panel .ng-dropdown-panel-items .ng-option.ng-option-selected.ng-option-marked {
+  background: #0f3259;
+  color: #ffffff;
+}
+
+.ng-dropdown-panel .ng-dropdown-panel-items .ng-option.ng-option-disabled {
+  color: #9ca3af;
+}
+
+/* Search input inside dropdown */
+.ng-dropdown-panel .ng-dropdown-header {
+  border-bottom: 1px solid #e4ddd0;
+  padding: 0.5rem 0.75rem;
+}
+
+/* Small variant — used in toolbars/filters */
+.ng-select.ng-select-sm .ng-select-container {
+  min-height: 36px;
+  font-size: 0.83rem;
+  border-radius: 7px;
+}
+
+/* Tags/multi-select pills */
+.ng-select.ng-select-multiple .ng-select-container .ng-value-container .ng-value {
+  background: #eaf0fb;
+  border: 1px solid #b5cce8;
+  border-radius: 5px;
+  color: #123c69;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.1rem 0.5rem;
+}
+
+.ng-select.ng-select-multiple .ng-select-container .ng-value-container .ng-value .ng-value-icon {
+  color: #123c69;
+  border-right: 1px solid #b5cce8;
+}
+
+.ng-select.ng-select-multiple .ng-select-container .ng-value-container .ng-value .ng-value-icon:hover {
+  background: #123c69;
+  color: #fff;
 }

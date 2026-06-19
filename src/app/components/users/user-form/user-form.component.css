@@ -1,0 +1,227 @@
+:host {
+  --navy: #123c69;
+  --navy-dark: #0d2d4f;
+  --gold: #9a7228;
+  --beige: #f6f4ef;
+  --line: #e4ddd0;
+  --text: #1a1a2e;
+  --muted: #64748b;
+  --red: #c0392b;
+  --red-bg: #fff0ef;
+}
+
+.form-page { padding: 0 0 3rem; }
+
+/* ── Card ── */
+.form-card {
+  max-width: 720px;
+  margin: 0 auto;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 4px 28px rgba(18,60,105,0.08);
+}
+
+/* ── Hero ── */
+.form-hero {
+  background: linear-gradient(135deg, #172841 0%, var(--navy) 100%);
+  padding: 2rem 2rem 1.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.6rem;
+}
+
+.hero-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.12);
+  border: 1.5px solid rgba(255,255,255,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  margin-bottom: 0.25rem;
+}
+
+.hero-title {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.02em;
+}
+
+.hero-sub { margin: 0; font-size: 0.875rem; color: rgba(255,255,255,0.7); }
+
+/* ── Body ── */
+.form-body { padding: 2rem; }
+
+/* ── Alert ── */
+.alert-error {
+  background: #fef2f2;
+  color: #b91c1c;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.25rem;
+  font-size: 0.875rem;
+  border-left: 3px solid var(--red);
+}
+
+/* ── Section label ── */
+.section-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--navy);
+  margin-bottom: 1.1rem;
+}
+
+.section-divider {
+  border: none;
+  border-top: 1px solid var(--line);
+  margin: 1.75rem 0;
+}
+
+/* ── Form layout ── */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.form-group label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.req { color: var(--red); }
+
+.form-control {
+  width: 100%;
+  padding: 0.7rem 0.9rem;
+  border: 1.5px solid var(--line);
+  border-radius: 9px;
+  font-size: 0.9rem;
+  color: var(--text);
+  background: var(--beige);
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+.form-control::placeholder { color: #9ca3af; }
+.form-control:focus {
+  outline: none;
+  border-color: var(--navy);
+  box-shadow: 0 0 0 3px rgba(18,60,105,0.1);
+  background: #fff;
+}
+
+.field-error {
+  font-size: 0.78rem;
+  color: var(--red);
+}
+
+/* ── Password section ── */
+.password-section { display: flex; flex-direction: column; gap: 0.75rem; }
+
+.btn-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: none;
+  border: none;
+  color: var(--navy);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.875rem;
+  padding: 0;
+  font-family: inherit;
+  transition: color 0.15s;
+}
+.btn-link:hover { color: var(--navy-dark); }
+
+.inline-reset {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+.inline-reset .form-control { flex: 1; }
+
+.btn-apply {
+  padding: 0.65rem 1.1rem;
+  background: var(--navy);
+  color: white;
+  border: none;
+  border-radius: 9px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.875rem;
+  white-space: nowrap;
+  transition: background 0.2s;
+}
+.btn-apply:hover { background: var(--navy-dark); }
+
+/* ── Form actions ── */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 2rem;
+}
+
+.btn-cancel {
+  padding: 0.65rem 1.25rem;
+  border: 1.5px solid var(--line);
+  border-radius: 9px;
+  background: #fff;
+  color: var(--text);
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.875rem;
+  transition: border-color 0.15s;
+}
+.btn-cancel:hover { border-color: #b8b0a4; }
+
+.btn-submit {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.65rem 1.4rem;
+  background: var(--navy);
+  color: #fff;
+  border: none;
+  border-radius: 9px;
+  font-weight: 700;
+  font-size: 0.875rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.2s, transform 0.15s;
+}
+.btn-submit:hover:not(:disabled) {
+  background: var(--navy-dark);
+  transform: translateY(-1px);
+}
+.btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+
+@media (max-width: 600px) {
+  .form-grid { grid-template-columns: 1fr; }
+  .inline-reset { flex-direction: column; align-items: stretch; }
+}

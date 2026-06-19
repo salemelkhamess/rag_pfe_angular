@@ -1,6 +1,15 @@
-import { Component, HostListener } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { AuthService } from '../../../../core/services/auth.service';
+
+interface SidebarMenuItem {
+  path: string;
+  icon: string;
+  label: string;
+  adminOnly?: boolean;
+}
 
 @Component({
   selector: 'app-sidebar',
@@ -9,18 +18,24 @@ import { RouterModule } from '@angular/router';
   templateUrl: './sidebar.component.html',
   styleUrls: ['./sidebar.component.css']
 })
-export class SidebarComponent {
-  menuItems = [
-    { path: '/dashboard', icon: '🏠', label: 'Tableau de bord' },
-    { path: '/categories', icon: '📄', label: 'Catégories documents' },
+export class SidebarComponent implements OnInit, OnDestroy {
+  private authService = inject(AuthService);
+  private userSub?: Subscription;
 
-    { path: '/documents', icon: '📄', label: 'Documents' },
-    { path: '/conversations', icon: '💬', label: 'Conversations' },
-
-    { path: '/chat', icon: '💬', label: 'Chat RAG' },
-    { path: '/users', icon: '👥', label: 'Utilisateurs' },
-    { path: '/settings', icon: '⚙️', label: 'Paramètres' }
+  private readonly allMenuItems: SidebarMenuItem[] = [
+    { path: '/dashboard',    icon: 'home',     label: 'Tableau de bord' },
+    { path: '/documents',    icon: 'docs',     label: 'Documents' },
+    { path: '/conversations',icon: 'chat',     label: 'Conversations' },
+    { path: '/categories',   icon: 'folder',   label: 'Catégories', adminOnly: true },
+    { path: '/parametrage',  icon: 'settings', label: 'Paramétrage LLM', adminOnly: true },
+    { path: '/users',        icon: 'users',    label: 'Utilisateurs', adminOnly: true },
   ];
+
+  isAdmin = signal(false);
+
+  menuItems = computed(() =>
+    this.allMenuItems.filter((item) => !item.adminOnly || this.isAdmin())
+  );
 
   isSidebarCollapsed = false;
   isMobileOpen = false;
@@ -28,6 +43,16 @@ export class SidebarComponent {
 
   constructor() {
     this.checkScreenSize();
+  }
+
+  ngOnInit(): void {
+    this.userSub = this.authService.currentUser$.subscribe((user) => {
+      this.isAdmin.set(user?.roles?.includes('admin') ?? false);
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.userSub?.unsubscribe();
   }
 
   @HostListener('window:resize')

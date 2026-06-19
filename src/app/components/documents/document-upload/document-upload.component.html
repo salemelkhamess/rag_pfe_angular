@@ -1,138 +1,202 @@
 <!-- src/app/components/documents/document-upload/document-upload.component.html -->
 <div class="upload-container">
-  <div class="upload-header">
-    <h2>📄 Upload Document</h2>
-    <p>Upload your documents to start processing</p>
-  </div>
 
-  <!-- Zone de drop (désactivée pendant l'upload) -->
-  <div class="drop-zone"
-       [class.drag-over]="isDragging && !isUploading"
-       [class.disabled]="isUploading"
-       (dragover)="!isUploading && onDragOver($event)"
-       (dragleave)="!isUploading && onDragLeave($event)"
-       (drop)="!isUploading && onDrop($event)">
-    <div class="drop-zone-content">
-      <div class="upload-icon">📁</div>
-      <p>Drag & drop your file here</p>
-      <span>or</span>
-      <label class="browse-btn" [class.disabled]="isUploading">
-        Browse Files
-        <input type="file" (change)="!isUploading && onFileSelected($event)"
-               accept=".txt,.pdf,.docx,.xlsx,.jpg,.png"
-               [disabled]="isUploading"
-               hidden>
-      </label>
-      <p class="file-hint">Supported formats: TXT, PDF, DOCX, XLSX, JPG, PNG (Max 100MB)</p>
-    </div>
-  </div>
+  <div class="page-card">
 
-  <!-- Fichier sélectionné -->
-  @if (selectedFile && !isUploading) {
-    <div class="selected-file">
-      <div class="file-info">
-        <span class="file-icon">📄</span>
-        <div class="file-details">
-          <strong>{{ selectedFile.name }}</strong>
-          <small>{{ (selectedFile.size / 1024).toFixed(2) }} KB</small>
+    <!-- Card Header -->
+    <div class="page-card-header">
+      <div class="pch-left">
+        <div class="pch-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
         </div>
-        <button class="remove-file" (click)="resetForm()">✕</button>
+        <div class="pch-titles">
+          <h2>Ajouter un document</h2>
+          <span class="pch-count">Importez un fichier pour l'analyser et l'indexer</span>
+        </div>
       </div>
-    </div>
-  }
-
-  <!-- Formulaire (désactivé pendant l'upload) -->
-  @if (selectedFile && !isUploading) {
-    <div class="form-group">
-      <label>Category</label>
-      <select [(ngModel)]="selectedCategoryId" class="form-control">
-        <option [value]="null">No category</option>
-        @for (cat of categories(); track cat.id) {
-          <option [value]="cat.id">
-            {{ '—'.repeat(cat.level) }} {{ cat.name }}
-          </option>
-        }
-      </select>
+      <a routerLink="/documents" class="btn-back">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+        Retour
+      </a>
     </div>
 
-    <div class="upload-form">
-      <div class="form-group">
-        <label>Document Name *</label>
-        <input type="text"
-               [(ngModel)]="documentName"
-               placeholder="Enter document name"
-               class="form-control">
-      </div>
+    <!-- Content -->
+    <div class="card-content upload-body">
 
-      <div class="form-group">
-        <label>Description</label>
-        <textarea [(ngModel)]="description"
-                  rows="3"
-                  placeholder="Enter a description (optional)"
-                  class="form-control"></textarea>
-      </div>
-
-      <div class="form-group">
-        <label>Document Type</label>
-        <select [(ngModel)]="documentType" class="form-control">
-          <option value="TXT">📄 Text File (TXT)</option>
-          <option value="PDF">📕 PDF Document</option>
-          <option value="DOCX">📘 Word Document</option>
-          <option value="XLSX">📊 Excel Spreadsheet</option>
-          <option value="IMAGE">🖼️ Image File</option>
-        </select>
-      </div>
-
-      <button (click)="upload()"
-              [disabled]="!selectedFile || !documentName"
-              class="btn-upload">
-        <span>🚀</span> Upload Document
-      </button>
-    </div>
-  }
-
-  <!-- État Upload en cours -->
-  @if (isUploading) {
-    <div class="uploading-state">
-      <div class="uploading-header">
-        <div class="spinner"></div>
-        <h3>Uploading...</h3>
-      </div>
-
-      <!-- Barre de progression -->
-      <div class="progress-container">
-        <div class="progress-bar" [style.width.%]="uploadProgress">
-          <span class="progress-text">{{ uploadProgress }}%</span>
+      <!-- Drop zone -->
+      <div class="drop-zone"
+           [class.drag-over]="isDragging && !isUploading"
+           [class.disabled]="isUploading"
+           (dragover)="!isUploading && onDragOver($event)"
+           (dragleave)="!isUploading && onDragLeave($event)"
+           (drop)="!isUploading && onDrop($event)">
+        <div class="drop-zone-content">
+          <div class="upload-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+          </div>
+          <p class="dz-title">Glissez votre fichier ici</p>
+          <span class="dz-or">ou</span>
+          <label class="browse-btn" [class.disabled]="isUploading">
+            Parcourir les fichiers
+            <input type="file" (change)="!isUploading && onFileSelected($event)"
+                   accept=".txt,.pdf,.docx,.xlsx,.jpg,.png"
+                   [disabled]="isUploading"
+                   hidden>
+          </label>
+          <p class="file-hint">TXT, PDF, DOCX, XLSX, JPG, PNG — max. 100 MB</p>
         </div>
       </div>
 
-      <p class="uploading-info">Please wait while your document is being uploaded</p>
+      <!-- Selected file preview -->
+      @if (selectedFile && !isUploading) {
+        <div class="selected-file">
+          <div class="file-info">
+            <div class="file-icon-box">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+              </svg>
+            </div>
+            <div class="file-details">
+              <strong>{{ selectedFile.name }}</strong>
+              <small>{{ (selectedFile.size / 1024).toFixed(2) }} KB</small>
+            </div>
+            <button class="remove-file" (click)="resetForm()" title="Retirer le fichier">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      }
 
-      <button class="btn-cancel-upload" (click)="cancelUpload()">
-        Cancel Upload
-      </button>
-    </div>
-  }
+      <!-- Form fields -->
+      @if (selectedFile && !isUploading) {
+        <div class="upload-form">
 
-  <!-- Succès -->
-  @if (uploadSuccess && !isUploading) {
-    <div class="alert success">
-      <span>✅</span>
-      <div>
-        <strong>Document uploaded successfully!</strong>
-        <p>Redirecting to documents list...</p>
-      </div>
-    </div>
-  }
+          <div class="form-row">
+            <div class="form-group">
+              <label>Nom du document <span class="req">*</span></label>
+              <input type="text"
+                     [(ngModel)]="documentName"
+                     placeholder="Ex. Rapport financier 2026"
+                     class="form-control">
+            </div>
+            <div class="form-group">
+              <label>Catégorie</label>
+              <ng-select [(ngModel)]="selectedCategoryId"
+                         [searchable]="true"
+                         [clearable]="true"
+                         placeholder="Sans catégorie"
+                         class="form-control">
+                <ng-option [value]="null">Sans catégorie</ng-option>
+                @for (cat of categories(); track cat.id) {
+                  <ng-option [value]="cat.id">{{ '—'.repeat(cat.level) }} {{ cat.name }}</ng-option>
+                }
+              </ng-select>
+            </div>
+          </div>
 
-  <!-- Erreur -->
-  @if (uploadError && !isUploading) {
-    <div class="alert error">
-      <span>❌</span>
-      <div>
-        <strong>Upload failed</strong>
-        <p>{{ uploadError }}</p>
-      </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Type de document</label>
+              <ng-select [(ngModel)]="documentType"
+                         [searchable]="true"
+                         [clearable]="false"
+                         class="form-control">
+                <ng-option value="TXT">Text File (TXT)</ng-option>
+                <ng-option value="PDF">PDF Document</ng-option>
+                <ng-option value="DOCX">Word Document</ng-option>
+                <ng-option value="XLSX">Excel Spreadsheet</ng-option>
+                <ng-option value="IMAGE">Image File</ng-option>
+              </ng-select>
+            </div>
+            <div class="form-group">
+              <label>Description</label>
+              <textarea [(ngModel)]="description"
+                        rows="2"
+                        placeholder="Courte description optionnelle..."
+                        class="form-control"></textarea>
+            </div>
+          </div>
+
+          <div class="form-submit-row">
+            <button (click)="upload()"
+                    [disabled]="!selectedFile || !documentName"
+                    class="btn-upload">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+              Importer le document
+            </button>
+          </div>
+
+        </div>
+      }
+
+      <!-- Uploading state -->
+      @if (isUploading) {
+        <div class="uploading-state">
+          <div class="uploading-header">
+            <div class="spinner"></div>
+            <h3>Import en cours...</h3>
+          </div>
+          <div class="progress-container">
+            <div class="progress-bar" [style.width.%]="uploadProgress">
+              <span class="progress-text">{{ uploadProgress }}%</span>
+            </div>
+          </div>
+          <p class="uploading-info">Veuillez patienter pendant le transfert du document.</p>
+          <button class="btn-cancel-upload" (click)="cancelUpload()">Annuler l'import</button>
+        </div>
+      }
+
+      <!-- Success -->
+      @if (uploadSuccess && !isUploading) {
+        <div class="alert success">
+          <div class="alert-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+          <div>
+            <strong>Document importé avec succès.</strong>
+            <p>Redirection vers la liste des documents...</p>
+          </div>
+        </div>
+      }
+
+      <!-- Error -->
+      @if (uploadError && !isUploading) {
+        <div class="alert error">
+          <div class="alert-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </div>
+          <div>
+            <strong>Import impossible</strong>
+            <p>{{ uploadError }}</p>
+          </div>
+        </div>
+      }
+
     </div>
-  }
+    <!-- /card-content -->
+
+  </div>
+  <!-- /page-card -->
+
 </div>

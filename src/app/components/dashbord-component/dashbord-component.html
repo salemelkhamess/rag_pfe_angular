@@ -1,21 +1,23 @@
-<div class="dashboard-container fade-in">
+<div class="dashboard fade-in">
 
-  <!-- En-tête -->
-  <div class="dashboard-header">
-    <div>
-      <h1 class="dashboard-title">Tableau de bord</h1>
-      <p class="dashboard-subtitle">
-        Bonjour {{ currentUser?.firstName || currentUser?.username || 'Admin' }} — voici l'état de votre plateforme RAG
-      </p>
+  <!-- ── Hero Banner ── -->
+  <div class="dash-hero">
+    <div class="hero-left">
+      <p class="hero-eyebrow">Tableau de bord</p>
+      <h1 class="hero-title">Bonjour, {{ currentUser?.firstName || currentUser?.username || 'Admin' }} 👋</h1>
+      <p class="hero-sub">Voici l'état de votre plateforme RAG</p>
     </div>
-    <div class="header-actions">
-      <a routerLink="/documents/upload" class="btn-primary">
-        <span>➕</span> Importer un document
-      </a>
-    </div>
+    <a routerLink="/documents/upload" class="btn-hero-upload">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="17 8 12 3 7 8"/>
+        <line x1="12" y1="3" x2="12" y2="15"/>
+      </svg>
+      Importer un document
+    </a>
   </div>
 
-  <!-- Loader -->
+  <!-- ── Loading ── -->
   @if (loading()) {
     <div class="loading-state">
       <div class="spinner"></div>
@@ -24,85 +26,206 @@
   }
 
   @if (!loading()) {
-    <!-- Cartes de statistiques -->
+
+    <!-- ── KPI Stats ── -->
     <div class="stats-grid">
-      @for (stat of stats(); track stat.title) {
-        <div class="stat-card" [style.border-bottom-color]="stat.color">
-          <div class="stat-icon" [style.background]="stat.color + '22'">
-            <span>{{ stat.icon }}</span>
-          </div>
-          <div class="stat-info">
-            <h3 class="stat-title">{{ stat.title }}</h3>
-            <p class="stat-value">{{ stat.value }}</p>
-          </div>
-          @if (stat.link) {
-            <a [routerLink]="stat.link" class="stat-link">Voir →</a>
-          }
+
+      <!-- Documents -->
+      <div class="stat-card">
+        <div class="stat-icon-box navy">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+            <polyline points="10 9 9 9 8 9"/>
+          </svg>
         </div>
-      }
+        <div class="stat-body">
+          <div class="stat-value">{{ stats()[0]?.value ?? '—' }}</div>
+          <div class="stat-label">{{ stats()[0]?.title ?? 'Documents' }}</div>
+        </div>
+        <a routerLink="/documents" class="stat-link-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </a>
+      </div>
+
+      <!-- Conversations -->
+      <div class="stat-card">
+        <div class="stat-icon-box gold">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+        </div>
+        <div class="stat-body">
+          <div class="stat-value">{{ stats()[1]?.value ?? '—' }}</div>
+          <div class="stat-label">{{ stats()[1]?.title ?? 'Conversations' }}</div>
+        </div>
+        <a routerLink="/conversations" class="stat-link-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </a>
+      </div>
+
+      <!-- Catégories -->
+      <div class="stat-card">
+        <div class="stat-icon-box teal">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+          </svg>
+        </div>
+        <div class="stat-body">
+          <div class="stat-value">{{ stats()[2]?.value ?? '—' }}</div>
+          <div class="stat-label">{{ stats()[2]?.title ?? 'Catégories' }}</div>
+        </div>
+        <a routerLink="/categories" class="stat-link-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </a>
+      </div>
+
+      <!-- Indexés -->
+      <div class="stat-card">
+        <div class="stat-icon-box purple">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 11 12 14 22 4"/>
+            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+          </svg>
+        </div>
+        <div class="stat-body">
+          <div class="stat-value">{{ stats()[3]?.value ?? '—' }}</div>
+          <div class="stat-label">{{ stats()[3]?.title ?? 'Indexés' }}</div>
+        </div>
+        <a routerLink="/documents" class="stat-link-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </a>
+      </div>
+
     </div>
 
-    <!-- Graphiques -->
-    <div class="charts-grid">
+    <!-- ── Charts ── -->
+    <div class="charts-row">
+
+      <!-- Bar chart -->
       <div class="chart-card">
-        <div class="card-header">
-          <h3>Évolution des requêtes</h3>
-          <span class="period">12 derniers mois</span>
+        <div class="chart-head">
+          <div class="chart-head-left">
+            <div class="chart-icon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+              </svg>
+            </div>
+            <h3>Évolution des requêtes</h3>
+          </div>
+          <span class="period-badge">12 derniers mois</span>
         </div>
-        <div class="chart-container">
-          <div class="bar-chart">
-            @for (query of chartData.queries; track $index; let i = $index) {
-              <div class="bar-item">
-                <div class="bar-label">{{ chartData.labels[i] }}</div>
-                <div class="bar-wrapper">
-                  <div class="bar" [style.height.%]="(query / barMax) * 100" style="background: #667eea">
-                    <span class="bar-value">{{ query }}</span>
-                  </div>
-                </div>
+        <div class="bar-chart-wrap">
+          @for (query of chartData.queries; track $index; let i = $index) {
+            <div class="bar-col">
+              <div class="bar-val-label">{{ query }}</div>
+              <div class="bar-track">
+                <div class="bar-fill" [style.height.%]="(query / barMax) * 100"></div>
               </div>
+              <div class="bar-month">{{ chartData.labels[i] }}</div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Line chart -->
+      <div class="chart-card">
+        <div class="chart-head">
+          <div class="chart-head-left">
+            <div class="chart-icon gold-icon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+              </svg>
+            </div>
+            <h3>Documents indexés</h3>
+          </div>
+          <span class="period-badge">12 derniers mois</span>
+        </div>
+        <div class="line-chart-wrap">
+          <svg viewBox="0 0 500 160" class="chart-svg" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="navyGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#123c69" stop-opacity="0.18"/>
+                <stop offset="100%" stop-color="#123c69" stop-opacity="0.01"/>
+              </linearGradient>
+            </defs>
+            <!-- Grid lines -->
+            <line x1="0" y1="40" x2="500" y2="40" stroke="#e4ddd0" stroke-width="1"/>
+            <line x1="0" y1="80" x2="500" y2="80" stroke="#e4ddd0" stroke-width="1"/>
+            <line x1="0" y1="120" x2="500" y2="120" stroke="#e4ddd0" stroke-width="1"/>
+            <!-- Fill area -->
+            <polygon fill="url(#navyGrad)"
+              points="20,145 60,125 100,108 140,90 180,75 220,60 260,46 300,38 340,30 380,24 420,18 460,13 460,155 20,155"/>
+            <!-- Line -->
+            <polyline fill="none" stroke="#123c69" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+              points="20,145 60,125 100,108 140,90 180,75 220,60 260,46 300,38 340,30 380,24 420,18 460,13"/>
+            <!-- Dots -->
+            <circle cx="20"  cy="145" r="3.5" fill="#fff" stroke="#123c69" stroke-width="2"/>
+            <circle cx="60"  cy="125" r="3.5" fill="#fff" stroke="#123c69" stroke-width="2"/>
+            <circle cx="100" cy="108" r="3.5" fill="#fff" stroke="#123c69" stroke-width="2"/>
+            <circle cx="140" cy="90"  r="3.5" fill="#fff" stroke="#123c69" stroke-width="2"/>
+            <circle cx="180" cy="75"  r="3.5" fill="#fff" stroke="#123c69" stroke-width="2"/>
+            <circle cx="220" cy="60"  r="3.5" fill="#fff" stroke="#123c69" stroke-width="2"/>
+            <circle cx="260" cy="46"  r="3.5" fill="#fff" stroke="#123c69" stroke-width="2"/>
+            <circle cx="300" cy="38"  r="3.5" fill="#fff" stroke="#123c69" stroke-width="2"/>
+            <circle cx="340" cy="30"  r="3.5" fill="#fff" stroke="#123c69" stroke-width="2"/>
+            <circle cx="380" cy="24"  r="3.5" fill="#fff" stroke="#123c69" stroke-width="2"/>
+            <circle cx="420" cy="18"  r="3.5" fill="#fff" stroke="#123c69" stroke-width="2"/>
+            <circle cx="460" cy="13"  r="4"   fill="#123c69" stroke="#fff" stroke-width="2"/>
+          </svg>
+          <div class="chart-x-labels">
+            @for (label of chartData.labels.slice(-6); track label) {
+              <span>{{ label }}</span>
             }
           </div>
         </div>
       </div>
 
-      <div class="chart-card">
-        <div class="card-header">
-          <h3>Documents indexés</h3>
-          <span class="period">12 derniers mois</span>
-        </div>
-        <div class="chart-container">
-          <div class="line-chart">
-            <svg viewBox="0 0 500 200" class="chart-svg">
-              <polyline fill="none" stroke="#48bb78" stroke-width="2"
-                points="20,180 60,160 100,140 140,120 180,100 220,80 260,60 300,50 340,40 380,35 420,30 460,25"/>
-              @for (pt of [[20,180],[60,160],[100,140],[140,120],[180,100],[220,80],[260,60],[300,50],[340,40],[380,35],[420,30],[460,25]]; track $index) {
-                <circle [attr.cx]="pt[0]" [attr.cy]="pt[1]" r="3" fill="#48bb78"/>
-              }
-            </svg>
-            <div class="chart-labels">
-              @for (label of chartData.labels.slice(-6); track label) {
-                <span class="chart-label">{{ label }}</span>
-              }
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
 
-    <!-- Tables et listes -->
-    <div class="data-grid">
+    <!-- ── Data tables ── -->
+    <div class="data-row">
 
-      <!-- Documents récents (données réelles) -->
+      <!-- Recent documents -->
       <div class="data-card">
-        <div class="card-header">
-          <h3>📄 Documents récents</h3>
-          <a routerLink="/documents" class="view-all">Voir tout →</a>
+        <div class="data-card-head">
+          <div class="dch-left">
+            <div class="dch-icon">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+              </svg>
+            </div>
+            <h3>Documents récents</h3>
+          </div>
+          <a routerLink="/documents" class="view-all-link">
+            Voir tout
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </a>
         </div>
         @if (recentDocuments().length === 0) {
-          <div class="empty-state">Aucun document importé pour l'instant.</div>
+          <div class="data-empty">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#b8cde6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+            </svg>
+            <p>Aucun document importé pour l'instant.</p>
+          </div>
         } @else {
-          <div class="table-responsive">
-            <table class="data-table">
+          <div class="table-wrap">
+            <table class="dash-table">
               <thead>
                 <tr>
                   <th>Nom</th>
@@ -115,12 +238,13 @@
               <tbody>
                 @for (doc of recentDocuments(); track doc.id) {
                   <tr>
-                    <td class="doc-name" [title]="doc.name">{{ doc.name }}</td>
-                    <td><span class="file-type">{{ doc.type || getFileType(doc.mimeType) }}</span></td>
-                    <td>{{ formatSize(doc.size) }}</td>
-                    <td>{{ formatDate(doc.createdAt) }}</td>
+                    <td class="doc-name-cell" [title]="doc.name">{{ doc.name }}</td>
+                    <td><span class="type-chip">{{ doc.type || getFileType(doc.mimeType) }}</span></td>
+                    <td class="muted-cell">{{ formatSize(doc.size) }}</td>
+                    <td class="muted-cell">{{ formatDate(doc.createdAt) }}</td>
                     <td>
                       <span class="status-badge" [class]="getStatusClass(doc.status)">
+                        <span class="status-dot"></span>
                         {{ getStatusLabel(doc.status) }}
                       </span>
                     </td>
@@ -132,29 +256,51 @@
         }
       </div>
 
-      <!-- Conversations récentes (données réelles) -->
+      <!-- Recent conversations -->
       <div class="data-card">
-        <div class="card-header">
-          <h3>💬 Conversations récentes</h3>
-          <a routerLink="/conversations" class="view-all">Voir tout →</a>
+        <div class="data-card-head">
+          <div class="dch-left">
+            <div class="dch-icon gold-bg">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              </svg>
+            </div>
+            <h3>Conversations récentes</h3>
+          </div>
+          <a routerLink="/conversations" class="view-all-link">
+            Voir tout
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </a>
         </div>
         @if (recentConversations().length === 0) {
-          <div class="empty-state">Aucune conversation pour l'instant.</div>
+          <div class="data-empty">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#b8cde6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+            <p>Aucune conversation pour l'instant.</p>
+          </div>
         } @else {
-          <div class="queries-list">
+          <div class="conv-items">
             @for (conv of recentConversations(); track conv.id) {
-              <a [routerLink]="['/conversations', conv.id]" class="query-item query-link">
-                <div class="query-header">
-                  <div class="query-question">{{ conv.title }}</div>
-                  <div class="query-time">{{ formatDate(conv.updatedAt) }}</div>
+              <a [routerLink]="['/conversations', conv.id]" class="conv-item">
+                <div class="conv-item-icon">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                  </svg>
                 </div>
-                @if (conv.summary) {
-                  <div class="query-response">{{ conv.summary }}</div>
-                }
-                <div class="query-footer">
-                  <span class="msg-count-badge">{{ conv.messageCount }} messages</span>
-                  <span class="agent-badge">{{ conv.agentType }}</span>
+                <div class="conv-item-body">
+                  <div class="conv-item-title">{{ conv.title }}</div>
+                  @if (conv.summary) {
+                    <div class="conv-item-sub">{{ conv.summary }}</div>
+                  }
+                  <div class="conv-item-meta">
+                    <span class="msg-badge">{{ conv.messageCount }} msg</span>
+                    <span class="agent-badge-sm">{{ conv.agentType }}</span>
+                  </div>
                 </div>
+                <div class="conv-item-date">{{ formatDate(conv.updatedAt) }}</div>
               </a>
             }
           </div>
@@ -163,23 +309,54 @@
 
     </div>
 
-    <!-- Actions rapides -->
-    <div class="quick-actions">
-      <h3>Actions rapides</h3>
-      <div class="actions-grid">
-        <a routerLink="/documents/upload" class="action-btn">
-          <span>📤</span> Importer un document
+    <!-- ── Quick Actions ── -->
+    <div class="quick-actions-card">
+      <div class="qa-head">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+        </svg>
+        <h3>Actions rapides</h3>
+      </div>
+      <div class="qa-grid">
+        <a routerLink="/documents/upload" class="qa-btn">
+          <div class="qa-icon navy">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+          </div>
+          <span>Importer un document</span>
         </a>
-        <a routerLink="/conversations/new" class="action-btn">
-          <span>💬</span> Nouvelle conversation
+        <a routerLink="/conversations/new" class="qa-btn">
+          <div class="qa-icon gold">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+          </div>
+          <span>Nouvelle conversation</span>
         </a>
-        <a routerLink="/categories" class="action-btn">
-          <span>🗂️</span> Gérer les catégories
+        <a routerLink="/categories" class="qa-btn">
+          <div class="qa-icon teal">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+            </svg>
+          </div>
+          <span>Gérer les catégories</span>
         </a>
-        <a routerLink="/documents" class="action-btn">
-          <span>📋</span> Voir tous les documents
+        <a routerLink="/documents" class="qa-btn">
+          <div class="qa-icon purple">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+          </div>
+          <span>Voir tous les documents</span>
         </a>
       </div>
     </div>
+
   }
 </div>

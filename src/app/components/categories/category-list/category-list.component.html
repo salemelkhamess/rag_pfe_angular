@@ -1,153 +1,144 @@
 <!-- src/app/components/categories/category-list/category-list.component.html -->
 <div class="categories-container">
-  <div class="header">
-    <div>
-      <h2>📂 Categories</h2>
-      <p class="subtitle">Manage your document categories</p>
-    </div>
-    <div class="header-actions">
-      <a routerLink="/categories/create" class="btn-create">
-        <span>➕</span> Create Category
+
+  <div class="page-card">
+
+    <!-- Card Header -->
+    <div class="page-card-header">
+      <div class="pch-left">
+        <div class="pch-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+          </svg>
+        </div>
+        <div class="pch-titles">
+          <h2>Catégories</h2>
+          <span class="pch-count">{{ filteredCategories().length }} catégorie{{ filteredCategories().length !== 1 ? 's' : '' }}</span>
+        </div>
+      </div>
+      <a routerLink="/categories/create" class="btn-primary">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        Nouvelle catégorie
       </a>
     </div>
-  </div>
 
-  <!-- Search Bar -->
-  <div class="search-bar">
-    <div class="search-input-wrapper">
-      <span class="search-icon">🔍</span>
-      <input type="text"
-             placeholder="Search categories..."
-             [(ngModel)]="searchTerm"
-             class="search-input">
+    <!-- Toolbar: search -->
+    <div class="card-toolbar">
+      <div class="search-wrapper">
+        <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input type="text"
+               placeholder="Rechercher une catégorie..."
+               [ngModel]="searchTerm()"
+               (ngModelChange)="searchTerm.set($event)"
+               class="search-input">
+      </div>
     </div>
-  </div>
 
-  <!-- Loading -->
-  @if (loading()) {
-    <div class="loading-state">
-      <div class="spinner"></div>
-      <p>Loading categories...</p>
-    </div>
-  }
+    <!-- Content -->
+    <div class="card-content no-pad">
 
-  <!-- Empty state -->
-  @if (!loading() && rootCategories().length === 0) {
-    <div class="empty-state">
-      <div class="empty-icon">📭</div>
-      <h3>No categories yet</h3>
-      <p>Create your first category to organize documents</p>
-      <a routerLink="/categories/create" class="empty-create-btn">
-        ➕ Create Category
-      </a>
-    </div>
-  }
+      @if (loading()) {
+        <div class="loading-state">
+          <div class="spinner"></div>
+          <p>Chargement des catégories...</p>
+        </div>
+      }
 
-  <!-- Categories Tree -->
-  @if (!loading() && rootCategories().length > 0) {
-    <div class="categories-tree">
-      @for (category of rootCategories(); track category.id) {
-        <div class="category-item" [style.marginLeft]="getLevelSpacing(category.level)">
-          <div class="category-row">
-            <div class="category-expand" (click)="toggleExpand(category.id)">
-              @if (getChildren(category.id).length > 0) {
-                <span class="expand-icon">{{ isExpanded(category.id) ? '▼' : '▶' }}</span>
-              } @else {
-                <span class="expand-icon-placeholder"></span>
-              }
-            </div>
-            <div class="category-icon" [style.backgroundColor]="category.color">
-              {{ category.icon || '📁' }}
-            </div>
-            <div class="category-info">
-              <div class="category-name">{{ category.name }}</div>
-              <div class="category-description">{{ category.description || 'No description' }}</div>
-            </div>
-            <div class="category-status">
-              <span class="status-badge" [class]="getStatusClass(category.active)">
-                {{ getStatusText(category.active) }}
-              </span>
-            </div>
-            <div class="category-actions">
-              <a [routerLink]="['/categories/edit', category.id]" class="action-btn edit" title="Edit">
-                ✏️
-              </a>
-              <button class="action-btn delete" (click)="confirmDelete(category)" title="Delete">
-                🗑️
-              </button>
-            </div>
+      @if (!loading() && filteredCategories().length === 0) {
+        <div class="empty-state">
+          <div class="empty-illustration">
+            <svg width="38" height="38" viewBox="0 0 64 64" fill="none">
+              <rect x="4" y="14" width="56" height="40" rx="6" fill="#dde8f5" stroke="#b8cde6" stroke-width="1.5"/>
+              <path d="M4 14h22l5 8H4z" fill="#b8cde6" stroke="#b8cde6" stroke-width="1"/>
+              <path d="M20 36h24M20 44h16" stroke="#b8cde6" stroke-width="2" stroke-linecap="round"/>
+            </svg>
           </div>
-
-          <!-- Children -->
-          @if (isExpanded(category.id) && getChildren(category.id).length > 0) {
-            <div class="category-children">
-              @for (child of getChildren(category.id); track child.id) {
-                <div class="category-item" [style.marginLeft]="getLevelSpacing(child.level)">
-                  <div class="category-row">
-                    <div class="category-expand">
-                      @if (getChildren(child.id).length > 0) {
-                        <span class="expand-icon" (click)="toggleExpand(child.id)">
-                          {{ isExpanded(child.id) ? '▼' : '▶' }}
-                        </span>
-                      } @else {
-                        <span class="expand-icon-placeholder"></span>
-                      }
-                    </div>
-                    <div class="category-icon" [style.backgroundColor]="child.color">
-                      {{ child.icon || '📄' }}
-                    </div>
-                    <div class="category-info">
-                      <div class="category-name">{{ child.name }}</div>
-                      <div class="category-description">{{ child.description || 'No description' }}</div>
-                    </div>
-                    <div class="category-status">
-                      <span class="status-badge" [class]="getStatusClass(child.active)">
-                        {{ getStatusText(child.active) }}
-                      </span>
-                    </div>
-                    <div class="category-actions">
-                      <a [routerLink]="['/categories/edit', child.id]" class="action-btn edit" title="Edit">
-                        ✏️
-                      </a>
-                      <button class="action-btn delete" (click)="confirmDelete(child)" title="Delete">
-                        🗑️
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              }
-            </div>
+          @if (searchTerm()) {
+            <p>Aucune catégorie ne correspond à <strong>« {{ searchTerm() }} »</strong></p>
+            <button class="btn-outline" (click)="searchTerm.set('')">Effacer la recherche</button>
+          } @else {
+            <h3>Aucune catégorie</h3>
+            <p>Créez votre première catégorie pour organiser vos documents</p>
+            <a routerLink="/categories/create" class="btn-primary">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              Nouvelle catégorie
+            </a>
           }
         </div>
       }
-    </div>
-  }
 
-  <!-- Delete Modal -->
-  @if (showDeleteModal()) {
-    <div class="modal">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h3>Confirm Delete</h3>
-          <button class="close-btn" (click)="cancelDelete()">✕</button>
+      @if (!loading() && filteredCategories().length > 0) {
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th class="col-icon"></th>
+                <th class="col-name">Nom</th>
+                <th class="col-desc">Description</th>
+                <th class="col-parent">Catégorie parente</th>
+                <th class="col-status">Statut</th>
+                <th class="col-actions">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (cat of filteredCategories(); track cat.id) {
+                <tr>
+                  <td class="td-icon">
+                    <div class="cat-icon-box" [style.background]="cat.color || '#eaf0fb'">
+                      {{ cat.icon || '📁' }}
+                    </div>
+                  </td>
+                  <td class="td-name">
+                    <div class="name-cell" [style.paddingLeft]="getLevelSpacing(cat.level)">
+                      @if (cat.level > 0) {
+                        <span class="level-arrow">
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"/>
+                          </svg>
+                        </span>
+                      }
+                      <span class="cat-name">{{ cat.name }}</span>
+                    </div>
+                  </td>
+                  <td class="td-desc">{{ cat.description || '—' }}</td>
+                  <td class="td-parent">
+                    @if (cat.parentName) {
+                      <span class="parent-chip">{{ cat.parentName }}</span>
+                    } @else {
+                      <span class="root-chip">Racine</span>
+                    }
+                  </td>
+                  <td class="td-status">
+                    <span class="status-badge" [class]="getStatusClass(cat.active)">
+                      <span class="status-dot"></span>{{ getStatusText(cat.active) }}
+                    </span>
+                  </td>
+                  <td class="td-actions">
+                    <a [routerLink]="['/categories/edit', cat.id]" class="btn-edit">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                      </svg>
+                      Modifier
+                    </a>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
         </div>
-        <div class="modal-body">
-          <p>Are you sure you want to delete <strong>"{{ selectedCategory()?.name }}"</strong>?</p>
-          @if (getChildren(selectedCategory()?.id || '').length > 0) {
-            <p class="warning-text">⚠️ This category has sub-categories. Delete them first.</p>
-          } @else {
-            <p class="warning-text">This action cannot be undone.</p>
-          }
-        </div>
-        <div class="modal-footer">
-          <button class="btn-cancel" (click)="cancelDelete()">Cancel</button>
-          <button class="btn-confirm"
-                  (click)="deleteCategory()"
-                  [disabled]="getChildren(selectedCategory()?.id || '').length > 0">
-            Delete
-          </button>
-        </div>
-      </div>
+      }
+
     </div>
-  }
+    <!-- /card-content -->
+
+  </div>
+  <!-- /page-card -->
+
 </div>
