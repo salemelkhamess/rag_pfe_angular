@@ -910,6 +910,134 @@
   transition: width 0.4s ease;
 }
 
+/* ── Feedback stats grid ── */
+.feedback-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 0.75rem;
+  padding: 1rem 1.25rem 1.25rem;
+}
+
+.fb-kpi {
+  background: var(--beige);
+  border-radius: 12px;
+  padding: 0.85rem 0.75rem;
+  text-align: center;
+  border-left: 3px solid var(--navy);
+}
+
+.fb-kpi.green  { border-color: var(--green); }
+.fb-kpi.gold   { border-color: var(--gold); }
+.fb-kpi.teal   { border-color: var(--teal); }
+.fb-kpi.red    { border-color: var(--red); }
+
+.fb-val {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1.1;
+}
+
+.fb-lbl {
+  font-size: 0.7rem;
+  color: var(--muted);
+  margin-top: 0.2rem;
+  font-weight: 500;
+}
+
+/* ── Indexing health grid ── */
+.index-health-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  padding: 0.75rem 1.25rem 0.5rem;
+}
+
+.ih-kpi {
+  background: var(--beige);
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  border-left: 3px solid var(--navy);
+}
+
+.ih-val {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.ih-lbl {
+  font-size: 0.73rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-top: 0.2rem;
+}
+
+.ih-sub {
+  font-size: 0.68rem;
+  color: var(--muted);
+}
+
+.status-dist-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.5rem 1.25rem 1rem;
+}
+
+.status-dist-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.status-dist-row .status-badge {
+  min-width: 90px;
+  font-size: 0.68rem;
+}
+
+/* ── Daily traffic bars ── */
+.daily-bar-wrap {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 120px;
+  padding: 0.75rem 1.25rem 0.5rem;
+  overflow-x: auto;
+}
+
+.daily-bar-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  min-width: 14px;
+  gap: 3px;
+}
+
+.daily-bar-track {
+  width: 100%;
+  height: 90px;
+  background: #e8e5de;
+  border-radius: 3px;
+  display: flex;
+  align-items: flex-end;
+}
+
+.daily-bar-fill {
+  width: 100%;
+  background: var(--navy);
+  border-radius: 3px;
+  min-height: 2px;
+  transition: height 0.3s ease;
+}
+
+.daily-bar-label {
+  font-size: 0.6rem;
+  color: var(--muted);
+  text-align: center;
+}
+
 /* ── Responsive ── */
 @media (max-width: 1100px) {
   .stats-grid     { grid-template-columns: repeat(2, 1fr); }

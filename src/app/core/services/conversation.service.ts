@@ -75,6 +75,24 @@ export interface ModelStat {
   tokensUsed: number;
 }
 
+export interface FeedbackStats {
+  totalFeedbacks: number;
+  positiveFeedbacks: number;
+  negativeFeedbacks: number;
+  satisfactionRate: number;
+  avgRating: number | null;
+}
+
+export interface DailyStat {
+  date: string;
+  count: number;
+}
+
+export interface CitedDocStat {
+  documentName: string;
+  citationCount: number;
+}
+
 export interface ConversationStats {
   totalConversations: number;
   totalMessages: number;
@@ -88,6 +106,10 @@ export interface ConversationStats {
   agentTypeDistribution: Record<string, number>;
   providerStats: ProviderStat[];
   modelStats: ModelStat[];
+  feedbackStats: FeedbackStats | null;
+  retrievalFailureRate: number | null;
+  dailyMessages: DailyStat[];
+  topCitedDocuments: CitedDocStat[];
 }
 
 export interface CreateConversationRequest {

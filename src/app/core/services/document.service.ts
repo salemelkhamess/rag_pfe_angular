@@ -23,6 +23,13 @@ export interface Document {
   processedAt: string | null;
 }
 
+export interface DocumentStats {
+  totalDocuments: number;
+  statusDistribution: Record<string, number>;
+  typeDistribution: Record<string, number>;
+  totalStorageBytes: number;
+}
+
 export interface PageResponse<T> {
   content: T[];
   pageable: {
@@ -122,5 +129,9 @@ export class DocumentService {
 
   deleteDocument(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+
+  getStats(): Observable<DocumentStats> {
+    return this.http.get<DocumentStats>(`${this.apiUrl}/stats`);
   }
 }

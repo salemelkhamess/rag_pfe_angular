@@ -504,6 +504,198 @@
     </div>
     } <!-- /isAdmin -->
 
+    <!-- ── Document Health & Feedback (admin only) ── -->
+    @if (isAdmin) {
+    <div class="llm-section">
+
+      <div class="section-title-row">
+        <div class="section-title-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          </svg>
+        </div>
+        <h2 class="section-title">Santé des documents & Satisfaction</h2>
+      </div>
+
+      <div class="llm-data-row">
+
+        <!-- Feedback satisfaction -->
+        <div class="llm-card">
+          <div class="llm-card-head">
+            <div class="dch-left">
+              <div class="dch-icon gold-bg">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/>
+                  <path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>
+                </svg>
+              </div>
+              <h3>Satisfaction utilisateurs</h3>
+            </div>
+          </div>
+          @if (!llmStats()?.feedbackStats?.totalFeedbacks) {
+            <div class="data-empty">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#b8cde6" stroke-width="1.5">
+                <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/>
+              </svg>
+              <p>Aucun feedback collecté pour l'instant.</p>
+            </div>
+          } @else {
+            <div class="feedback-stats-grid">
+              <div class="fb-kpi green">
+                <div class="fb-val">{{ llmStats()!.feedbackStats!.satisfactionRate.toFixed(1) }}%</div>
+                <div class="fb-lbl">Taux de satisfaction</div>
+              </div>
+              <div class="fb-kpi navy">
+                <div class="fb-val">{{ llmStats()!.feedbackStats!.totalFeedbacks }}</div>
+                <div class="fb-lbl">Feedbacks totaux</div>
+              </div>
+              <div class="fb-kpi teal">
+                <div class="fb-val">{{ llmStats()!.feedbackStats!.positiveFeedbacks }}</div>
+                <div class="fb-lbl">Positifs 👍</div>
+              </div>
+              <div class="fb-kpi red">
+                <div class="fb-val">{{ llmStats()!.feedbackStats!.negativeFeedbacks }}</div>
+                <div class="fb-lbl">Négatifs 👎</div>
+              </div>
+              @if (llmStats()!.feedbackStats!.avgRating != null) {
+                <div class="fb-kpi gold">
+                  <div class="fb-val">{{ llmStats()!.feedbackStats!.avgRating!.toFixed(1) }}/5</div>
+                  <div class="fb-lbl">Note moyenne</div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Retrieval failure + document status -->
+        <div class="llm-card">
+          <div class="llm-card-head">
+            <div class="dch-left">
+              <div class="dch-icon teal-bg">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                </svg>
+              </div>
+              <h3>Santé de l'indexation</h3>
+            </div>
+          </div>
+          <div class="index-health-grid">
+            <div class="ih-kpi">
+              <div class="ih-val">{{ formatPercent(llmStats()?.retrievalFailureRate) }}</div>
+              <div class="ih-lbl">Taux d'échec retrieval</div>
+              <div class="ih-sub">Réponses sans contexte</div>
+            </div>
+            <div class="ih-kpi">
+              <div class="ih-val">{{ formatStorage(docStats()?.totalStorageBytes) }}</div>
+              <div class="ih-lbl">Stockage total</div>
+              <div class="ih-sub">{{ docStats()?.totalDocuments ?? 0 }} documents</div>
+            </div>
+          </div>
+          @if (statusEntries().length) {
+            <div class="status-dist-list">
+              @for (s of statusEntries(); track s.key; let i = $index) {
+                <div class="status-dist-row">
+                  <span class="status-badge" [class]="getStatusClass(s.key)">
+                    <span class="status-dot"></span>{{ s.key }}
+                  </span>
+                  <div class="agent-bar-wrap">
+                    <div class="agent-bar-track">
+                      <div class="agent-bar-fill" [class]="'fill-' + (i % 4)"
+                           [style.width.%]="(s.value / (docStats()!.totalDocuments || 1)) * 100"></div>
+                    </div>
+                    <span class="agent-count">{{ s.value }}</span>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+      </div>
+
+      <div class="llm-data-row">
+
+        <!-- Daily traffic graph (real data) -->
+        <div class="llm-card">
+          <div class="llm-card-head">
+            <div class="dch-left">
+              <div class="dch-icon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+                </svg>
+              </div>
+              <h3>Trafic quotidien — 30 derniers jours</h3>
+            </div>
+          </div>
+          @if (!llmStats()?.dailyMessages?.length) {
+            <div class="data-empty">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#b8cde6" stroke-width="1.5">
+                <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+              </svg>
+              <p>Aucune donnée de trafic disponible.</p>
+            </div>
+          } @else {
+            <div class="daily-bar-wrap">
+              @for (day of llmStats()!.dailyMessages; track day.date) {
+                <div class="daily-bar-col" [title]="day.date + ': ' + day.count + ' messages'">
+                  <div class="daily-bar-track">
+                    <div class="daily-bar-fill" [style.height.%]="(day.count / dailyBarMax()) * 100"></div>
+                  </div>
+                  <div class="daily-bar-label">{{ day.date.slice(8) }}</div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Top cited documents -->
+        <div class="llm-card">
+          <div class="llm-card-head">
+            <div class="dch-left">
+              <div class="dch-icon purple-bg">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                </svg>
+              </div>
+              <h3>Documents les plus cités (30j)</h3>
+            </div>
+          </div>
+          @if (!llmStats()?.topCitedDocuments?.length) {
+            <div class="data-empty">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#b8cde6" stroke-width="1.5">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+              <p>Aucun document cité dans les 30 derniers jours.</p>
+            </div>
+          } @else {
+            <div class="top-users-list">
+              @for (doc of llmStats()!.topCitedDocuments; track doc.documentName; let i = $index) {
+                <div class="top-user-row">
+                  <div class="rank-badge" [class]="i === 0 ? 'rank-gold' : i === 1 ? 'rank-silver' : i === 2 ? 'rank-bronze' : 'rank-plain'">
+                    {{ i + 1 }}
+                  </div>
+                  <div class="user-info">
+                    <div class="user-name-cell" [title]="doc.documentName">{{ doc.documentName }}</div>
+                    <div class="user-meta-cell">{{ doc.citationCount }} citation{{ doc.citationCount > 1 ? 's' : '' }}</div>
+                  </div>
+                  <div class="token-bar-wrap">
+                    <div class="token-bar-track">
+                      <div class="token-bar-fill" [style.width.%]="(doc.citationCount / citedDocMax()) * 100"></div>
+                    </div>
+                    <span class="token-count-label">{{ doc.citationCount }}</span>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+      </div>
+
+    </div>
+    } <!-- /isAdmin -->
+
     <!-- ── Data tables ── -->
     <div class="data-row">
 

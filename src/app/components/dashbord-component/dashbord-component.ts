@@ -2,7 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
-import { DocumentService, Document } from '../../core/services/document.service';
+import { DocumentService, Document, DocumentStats } from '../../core/services/document.service';
 import { ConversationService, Conversation, ConversationStats, ProviderStat, ModelStat } from '../../core/services/conversation.service';
 import { CategoryService } from '../../core/services/category.service';
 import { forkJoin, of } from 'rxjs';
@@ -25,6 +25,7 @@ export class DashbordComponent implements OnInit {
   recentDocuments = signal<Document[]>([]);
   recentConversations = signal<Conversation[]>([]);
   llmStats = signal<ConversationStats | null>(null);
+  docStats = signal<DocumentStats | null>(null);
 
   stats = signal([
     { title: 'Documents', value: '—', icon: '📄', color: '#667eea', link: '/documents' },
@@ -57,7 +58,8 @@ export class DashbordComponent implements OnInit {
       convs: this.conversationService.getConversations(0, 5).pipe(catchError(() => of(null))),
       cats: this.categoryService.getAllCategories().pipe(catchError(() => of(null))),
       llm: this.conversationService.getStats().pipe(catchError(() => of(null))),
-    }).subscribe(({ docs, convs, cats, llm }) => {
+      docStats: this.documentService.getStats().pipe(catchError(() => of(null))),
+    }).subscribe(({ docs, convs, cats, llm, docStats }) => {
       const docTotal = docs?.totalElements ?? 0;
       const convTotal = convs?.totalCount ?? 0;
       const catTotal = Array.isArray(cats) ? cats.length : 0;
@@ -68,6 +70,7 @@ export class DashbordComponent implements OnInit {
       this.recentDocuments.set(docs?.content ?? []);
       this.recentConversations.set(convs?.conversations ?? []);
       if (llm) this.llmStats.set(llm);
+      if (docStats) this.docStats.set(docStats);
 
       this.stats.set([
         { title: 'Documents', value: this.formatCount(docTotal), icon: '📄', color: '#667eea', link: '/documents' },
@@ -168,5 +171,42 @@ export class DashbordComponent implements OnInit {
 
   modelMax(): number {
     return Math.max(1, ...(this.llmStats()?.modelStats ?? []).map(m => m.messageCount));
+  }
+
+  formatPercent(rate: number | null | undefined): string {
+    if (rate == null) return '—';
+    return (rate * 100).toFixed(1) + '%';
+  }
+
+  dailyBarMax(): number {
+    const daily = this.llmStats()?.dailyMessages ?? [];
+    return Math.max(1, ...daily.map(d => d.count));
+  }
+
+  statusEntries(): { key: string; value: number }[] {
+    const dist = this.docStats()?.statusDistribution ?? {};
+    return Object.entries(dist).map(([key, value]) => ({ key, value: value as number }));
+  }
+
+  typeEntries(): { key: string; value: number }[] {
+    const dist = this.docStats()?.typeDistribution ?? {};
+    return Object.entries(dist).map(([key, value]) => ({ key, value: value as number }));
+  }
+
+  typeTotal(): number {
+    return Object.values(this.docStats()?.typeDistribution ?? {}).reduce((a, b) => a + (b as number), 0) || 1;
+  }
+
+  citedDocMax(): number {
+    const cited = this.llmStats()?.topCitedDocuments ?? [];
+    return Math.max(1, ...cited.map(d => d.citationCount));
+  }
+
+  formatStorage(bytes: number | null | undefined): string {
+    if (bytes == null || bytes === 0) return '0 B';
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    return (bytes / (1024 * 1024 * 1024)).toFixed(2) + ' GB';
   }
 }
