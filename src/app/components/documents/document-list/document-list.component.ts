@@ -68,7 +68,7 @@ export class DocumentListComponent implements OnInit, OnDestroy {
         takeUntil(this.destroy$),
         switchMap(() => {
           const hasPending = this.documents().some(
-            d => d.status === 'PENDING' || d.status === 'PROCESSING'
+            d => d.status === 'PENDING' || d.status === 'PROCESSING' || d.status === 'PROCESSED'
           );
           if (!hasPending || this.isLoading) return of(null);
           return this.documentService.getDocuments(this.currentPage, this.pageSize).pipe(
@@ -239,6 +239,9 @@ export class DocumentListComponent implements OnInit, OnDestroy {
         return 'status-pending';
       case 'PROCESSING':
         return 'status-processing';
+      case 'PROCESSED':
+        return 'status-processing';
+      case 'INDEXED':
       case 'COMPLETED':
         return 'status-completed';
       case 'FAILED':
