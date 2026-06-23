@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, BehaviorSubject, throwError } from 'rxjs';
-import { tap, catchError, switchMap } from 'rxjs/operators';
+import { tap, catchError, switchMap, timeout } from 'rxjs/operators';
 import {
   LoginRequest,
   AuthResponse,
@@ -33,6 +33,7 @@ export class AuthService {
   login(credentials: LoginRequest): Observable<ApiResponse<AuthResponse>> {
     return this.http.post<ApiResponse<AuthResponse>>(`${this.API_URL}/login`, credentials)
       .pipe(
+        timeout(10000),
         tap(response => {
           if (response.success && response.data) {
             this.tokenService.setTokens(
@@ -166,20 +167,26 @@ export class AuthService {
 
   private handleError(error: any): Observable<never> {
     console.error('API Error:', error);
-    let errorMessage = 'An error occurred';
+    let errorMessage = 'Une erreur est survenue. Veuillez réessayer.';
 
-    if (error.error?.message) {
-      errorMessage = error.error.message;
+    if (error.name === 'TimeoutError' || error.name === 'AbortError') {
+      errorMessage = 'Le service ne répond pas. Veuillez réessayer dans quelques instants.';
+    } else if (error.status === 0) {
+      errorMessage = 'Service temporairement indisponible. Vérifiez votre connexion.';
     } else if (error.status === 401) {
-      errorMessage = 'Invalid credentials';
+      errorMessage = 'Identifiant ou mot de passe incorrect.';
     } else if (error.status === 403) {
-      errorMessage = 'Access denied';
+      errorMessage = 'Accès refusé.';
     } else if (error.status === 404) {
-      errorMessage = 'Service not found';
+      errorMessage = 'Service introuvable.';
     } else if (error.status === 500) {
-      errorMessage = 'Internal server error';
+      errorMessage = 'Erreur serveur. Veuillez réessayer.';
+    } else if (error.status === 503) {
+      errorMessage = 'Service temporairement indisponible.';
+    } else if (error.error?.message) {
+      errorMessage = error.error.message;
     }
 
-    return throwError(() => new Error(errorMessage));
+    return throwError(() => ({ message: errorMessage, status: error.status ?? 0 }));
   }
 }

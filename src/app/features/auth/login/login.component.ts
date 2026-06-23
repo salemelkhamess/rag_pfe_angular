@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {Router, ActivatedRoute, RouterLink} from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
@@ -26,7 +26,8 @@ export class LoginComponent implements OnInit {
     private fb: FormBuilder,
     private authService: AuthService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private cdr: ChangeDetectorRef
   ) {
     this.loginForm = this.fb.group({
       identifier: ['', [Validators.required, Validators.email]],
@@ -61,11 +62,21 @@ export class LoginComponent implements OnInit {
         this.isLoading = false;
         if (response.success) {
           this.router.navigate([this.returnUrl]);
+        } else {
+          this.errorMessage = response.message || 'Identifiant ou mot de passe incorrect.';
+          this.cdr.detectChanges();
         }
       },
       error: (error) => {
         this.isLoading = false;
-        this.errorMessage = error.message || 'Login failed. Please check your credentials.';
+        if (error.status === 0 || error.message?.includes('indisponible') || error.message?.includes('répond pas')) {
+          this.errorMessage = 'Service temporairement indisponible. Veuillez réessayer dans quelques instants.';
+        } else if (error.status === 401 || error.message?.includes('incorrect')) {
+          this.errorMessage = 'Identifiant ou mot de passe incorrect.';
+        } else {
+          this.errorMessage = error.message || 'Une erreur est survenue. Veuillez réessayer.';
+        }
+        this.cdr.detectChanges();
       }
     });
   }
