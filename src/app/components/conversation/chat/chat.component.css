@@ -239,6 +239,45 @@
 .form-control::placeholder { color: #a8a29e; }
 .textarea-first { resize: none; }
 
+.agent-mode-group { margin-bottom: 0.25rem; }
+
+.agent-mode-toggle {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.mode-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border: 1.5px solid #d0d7e8;
+  border-radius: 8px;
+  background: #f7f9fc;
+  color: #555;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.mode-btn:hover { border-color: #5b8dee; color: #3a5bc7; }
+
+.mode-btn.mode-active {
+  background: #eef2ff;
+  border-color: #5b8dee;
+  color: #3a5bc7;
+  font-weight: 600;
+}
+
+.mode-hint {
+  margin-top: 5px;
+  font-size: 0.75rem;
+  color: #7a8ab0;
+  font-style: italic;
+}
+
 .llm-selector-form {
   display: flex;
   gap: 0.75rem;
@@ -655,4 +694,78 @@
 .streaming-bubble {
   background: linear-gradient(135deg, #eaf0fb 0%, #dde8f5 100%);
   border-color: #b8cde6;
+}
+
+/* ── Tool trace ──────────────────────────────────────────── */
+.tool-trace-bubble {
+  background: linear-gradient(135deg, #f0f4ff 0%, #e8eeff 100%);
+  border-color: #c5d0f5;
+  padding: 10px 14px;
+  min-width: 260px;
+}
+
+.tool-trace {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tool-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 0.82rem;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.6);
+  flex-wrap: wrap;
+}
+
+.tool-running { border-left: 3px solid #5b8dee; }
+.tool-done    { border-left: 3px solid #28a745; opacity: 0.9; }
+.tool-error   { border-left: 3px solid #dc3545; }
+
+.tool-icon { font-size: 0.85rem; }
+
+.tool-name {
+  font-weight: 600;
+  color: #3a5bc7;
+  font-family: monospace;
+}
+
+.tool-thought {
+  color: #6b7aa1;
+  font-style: italic;
+  font-size: 0.78rem;
+  flex: 1;
+}
+
+.tool-preview {
+  width: 100%;
+  color: #555;
+  font-size: 0.75rem;
+  margin-top: 2px;
+  padding-left: 2px;
+  border-top: 1px solid #dde4f5;
+  padding-top: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 340px;
+}
+
+.tool-spinner {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border: 2px solid #5b8dee;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  margin-left: 4px;
+  flex-shrink: 0;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }

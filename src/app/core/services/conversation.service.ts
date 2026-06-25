@@ -132,11 +132,20 @@ export interface CreateFeedbackRequest {
   rating?: number;
 }
 
+export interface ToolStep {
+  tool: string;
+  thought?: string;
+  status: 'running' | 'done' | 'error';
+  preview?: string;
+}
+
 export interface StreamCallbacks {
   onUserSaved?: (msg: Message) => void;
   onToken: (token: string) => void;
   onDone: (msg: Message) => void;
   onError?: (err: string) => void;
+  onToolCall?: (tool: string, thought: string) => void;
+  onToolResult?: (tool: string, success: boolean, preview: string) => void;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -243,6 +252,16 @@ export class ConversationService {
               try { callbacks.onDone(JSON.parse(data)); } catch {
                 callbacks.onError?.('Erreur de parsing de la réponse finale.');
               }
+            } else if (currentEvent === 'tool_call') {
+              try {
+                const d = JSON.parse(data);
+                callbacks.onToolCall?.(d.tool, d.thought ?? '');
+              } catch { /* ignore malformed */ }
+            } else if (currentEvent === 'tool_result') {
+              try {
+                const d = JSON.parse(data);
+                callbacks.onToolResult?.(d.tool, d.success, d.preview ?? '');
+              } catch { /* ignore malformed */ }
             } else if (currentEvent === 'error') {
               callbacks.onError?.(data);
             }

@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy, signal, inject, ElementRef, ViewChild, Af
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { ConversationService, Conversation, Message, StreamCallbacks, SourceReference } from '../../../core/services/conversation.service';
+import { ConversationService, Conversation, Message, StreamCallbacks, SourceReference, ToolStep } from '../../../core/services/conversation.service';
 import { LlmService, ProviderInfo } from '../../../core/services/llm.service';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { DocumentService } from '../../../core/services/document.service';
@@ -30,8 +30,10 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
   sending = signal(false);
   isStreaming = signal(false);
   isListening = signal(false);
+  toolSteps = signal<ToolStep[]>([]);
   inputMessage = '';
   newConversationTitle = '';
+  selectedAgentType: 'document_qa' | 'tool_calling' = 'tool_calling';
   isNewConversation = signal(false);
   private shouldScroll = false;
   private streamController: AbortController | null = null;
@@ -151,7 +153,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
     if (!firstMessage) return;
 
     this.loading.set(true);
-    this.conversationService.createConversation({ title, agentType: 'document_qa' }).subscribe({
+    this.conversationService.createConversation({ title, agentType: this.selectedAgentType }).subscribe({
       next: (conv) => {
         // Navigate avec le message initial dans le state.
         // Le nouveau composant le récupère dans ngOnInit() et démarre le stream.
@@ -183,6 +185,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
     this.inputMessage = '';
     this.sending.set(true);
     this.isStreaming.set(false);
+    this.toolSteps.set([]);
     this.shouldScroll = true;
 
     const streamingPlaceholder: Message = {
@@ -207,10 +210,26 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
         );
         this.shouldScroll = true;
       },
+      onToolCall: (tool, thought) => {
+        this.toolSteps.update(steps => [
+          ...steps,
+          { tool, thought, status: 'running' }
+        ]);
+        this.shouldScroll = true;
+      },
+      onToolResult: (tool, success, preview) => {
+        this.toolSteps.update(steps =>
+          steps.map(s => s.tool === tool && s.status === 'running'
+            ? { ...s, status: success ? 'done' : 'error', preview }
+            : s)
+        );
+        this.shouldScroll = true;
+      },
       onDone: (aiMsg) => {
         this.messages.update(msgs =>
           msgs.map(m => m.id === this.STREAMING_ID ? aiMsg : m)
         );
+        this.toolSteps.set([]);
         this.sending.set(false);
         this.isStreaming.set(false);
         this.shouldScroll = true;
@@ -226,6 +245,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
           content: err.includes('HTTP') ? "Désolé, une erreur s'est produite." : err,
           createdAt: new Date().toISOString()
         }]);
+        this.toolSteps.set([]);
         this.sending.set(false);
         this.isStreaming.set(false);
         this.shouldScroll = true;
