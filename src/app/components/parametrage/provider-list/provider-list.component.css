@@ -184,6 +184,12 @@
 }
 .btn-act.delete:hover { background: var(--red); color: white; }
 
+.btn-act.toggle.toggle--on  { border-color: #f59e0b; color: #92400e; background: #fef3c7; }
+.btn-act.toggle.toggle--off { border-color: #22c55e; color: #15803d; background: #dcfce7; }
+.btn-act.toggle.toggle--on:hover  { background: #dc2626; border-color: #dc2626; color: white; }
+.btn-act.toggle.toggle--off:hover { background: #15803d; border-color: #15803d; color: white; }
+.btn-act.toggle.sm { padding: 0.25rem 0.55rem; font-size: 0.72rem; }
+
 /* ── Models panel (expanded) ── */
 .models-panel {
   border-top: 1px solid var(--line);

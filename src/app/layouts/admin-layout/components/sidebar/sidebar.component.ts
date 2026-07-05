@@ -29,6 +29,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
     { path: '/categories',   icon: 'folder',   label: 'Catégories', adminOnly: true },
     { path: '/parametrage',  icon: 'settings', label: 'Paramétrage LLM', adminOnly: true },
     { path: '/users',        icon: 'users',    label: 'Utilisateurs', adminOnly: true },
+    { path: '/audit',        icon: 'audit',    label: 'Audit',        adminOnly: true },
   ];
 
   isAdmin = signal(false);

@@ -122,6 +122,18 @@
                     </svg>
                     Modifier
                   </a>
+                  <button
+                    class="btn-act toggle"
+                    [class.toggle--on]="provider.active"
+                    [class.toggle--off]="!provider.active"
+                    (click)="toggleProvider(provider)"
+                    [title]="provider.active ? 'Désactiver' : 'Activer'">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="1" y="5" width="22" height="14" rx="7"/>
+                      <circle [attr.cx]="provider.active ? 16 : 8" cy="12" r="3" fill="currentColor"/>
+                    </svg>
+                    {{ provider.active ? 'Désactiver' : 'Activer' }}
+                  </button>
                 </div>
               </div>
 
@@ -155,10 +167,18 @@
                               }
                             </td>
                             <td>
-                              <span class="status-badge sm" [class]="getStatusClass(model.active)">
-                                <span class="status-dot"></span>
-                                {{ getStatusText(model.active) }}
-                              </span>
+                              <button
+                                class="btn-act toggle sm"
+                                [class.toggle--on]="model.active"
+                                [class.toggle--off]="!model.active"
+                                (click)="toggleModel(model)"
+                                [title]="model.active ? 'Désactiver' : 'Activer'">
+                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                  <rect x="1" y="5" width="22" height="14" rx="7"/>
+                                  <circle [attr.cx]="model.active ? 16 : 8" cy="12" r="3" fill="currentColor"/>
+                                </svg>
+                                {{ model.active ? 'Désactiver' : 'Activer' }}
+                              </button>
                             </td>
                           </tr>
                         }

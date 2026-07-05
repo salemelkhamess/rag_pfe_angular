@@ -340,7 +340,7 @@
 .status-inactive { background: #fee2e2; color: #dc2626; }
 
 /* Edit button */
-.td-actions { text-align: center; }
+.td-actions { text-align: center; display: flex; gap: 0.5rem; justify-content: center; align-items: center; flex-wrap: wrap; }
 
 .btn-edit {
   display: inline-flex;
@@ -362,6 +362,41 @@
   background: var(--navy);
   color: white;
   border-color: var(--navy);
+}
+
+.btn-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  border: 1.5px solid;
+  font-family: inherit;
+}
+.btn-toggle--active {
+  background: #fef3c7;
+  color: #92400e;
+  border-color: #fde68a;
+}
+.btn-toggle--active:hover {
+  background: #dc2626;
+  color: white;
+  border-color: #dc2626;
+}
+.btn-toggle--inactive {
+  background: #dcfce7;
+  color: #15803d;
+  border-color: #bbf7d0;
+}
+.btn-toggle--inactive:hover {
+  background: #15803d;
+  color: white;
+  border-color: #15803d;
 }
 
 /* ── Responsive ── */

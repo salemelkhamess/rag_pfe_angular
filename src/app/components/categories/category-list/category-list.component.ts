@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { CategoryService, Category } from '../../../core/services/category.service';
+import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-category-list',
@@ -14,6 +15,7 @@ import { CategoryService, Category } from '../../../core/services/category.servi
 })
 export class CategoryListComponent implements OnInit {
   private categoryService = inject(CategoryService);
+  private toastService = inject(ToastService);
 
   categories = signal<Category[]>([]);
   loading = signal(true);
@@ -103,6 +105,23 @@ export class CategoryListComponent implements OnInit {
   cancelDelete(): void {
     this.showDeleteModal.set(false);
     this.selectedCategory.set(null);
+  }
+
+  toggleCategory(category: Category): void {
+    const willEnable = !category.active;
+    this.categoryService.toggleCategoryStatus(category.id).subscribe({
+      next: (updated) => {
+        this.categories.update(list =>
+          list.map(c => c.id === updated.id ? { ...c, active: updated.active } : c)
+        );
+        this.toastService.success(
+          willEnable
+            ? `Catégorie "${category.name}" activée avec succès`
+            : `Catégorie "${category.name}" désactivée avec succès`
+        );
+      },
+      error: () => this.toastService.error('Erreur lors de la modification du statut')
+    });
   }
 
   getStatusClass(active: boolean): string {

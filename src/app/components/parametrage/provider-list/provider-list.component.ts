@@ -7,6 +7,7 @@ import {
   LlmProviderConfig,
   ParametrageService,
 } from '../../../core/services/parametrage.service';
+import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-provider-list',
@@ -17,6 +18,7 @@ import {
 })
 export class ProviderListComponent implements OnInit {
   private parametrageService = inject(ParametrageService);
+  private toastService = inject(ToastService);
 
   providers = signal<LlmProviderConfig[]>([]);
   models = signal<LlmModelConfig[]>([]);
@@ -100,6 +102,40 @@ export class ProviderListComponent implements OnInit {
   cancelDelete(): void {
     this.showDeleteModal.set(false);
     this.selectedProvider.set(null);
+  }
+
+  toggleProvider(provider: LlmProviderConfig): void {
+    const willEnable = !provider.active;
+    this.parametrageService.toggleProviderStatus(provider.id).subscribe({
+      next: (updated) => {
+        this.providers.update(list =>
+          list.map(p => p.id === updated.id ? { ...p, active: updated.active } : p)
+        );
+        this.toastService.success(
+          willEnable
+            ? `Provider "${provider.name}" activé avec succès`
+            : `Provider "${provider.name}" désactivé avec succès`
+        );
+      },
+      error: () => this.toastService.error('Erreur lors de la modification du statut')
+    });
+  }
+
+  toggleModel(model: LlmModelConfig): void {
+    const willEnable = !model.active;
+    this.parametrageService.toggleModelStatus(model.id).subscribe({
+      next: (updated) => {
+        this.models.update(list =>
+          list.map(m => m.id === updated.id ? { ...m, active: updated.active } : m)
+        );
+        this.toastService.success(
+          willEnable
+            ? `Modèle "${model.name}" activé avec succès`
+            : `Modèle "${model.name}" désactivé avec succès`
+        );
+      },
+      error: () => this.toastService.error('Erreur lors de la modification du statut')
+    });
   }
 
   getStatusClass(active: boolean): string {

@@ -5,6 +5,7 @@ import { RouterLink } from '@angular/router';
 import { UserInfoResponse } from '../../../core/models/auth.models';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { UserService } from '../../../core/services/user.service';
+import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-user-list',
@@ -15,6 +16,7 @@ import { UserService } from '../../../core/services/user.service';
 })
 export class UserListComponent implements OnInit {
   private userService = inject(UserService);
+  private toastService = inject(ToastService);
 
   users = signal<UserInfoResponse[]>([]);
   loading = signal(true);
@@ -109,12 +111,20 @@ export class UserListComponent implements OnInit {
   }
 
   toggleEnabled(user: UserInfoResponse): void {
+    const willEnable = !user.enabled;
     const action = user.enabled
       ? this.userService.disableUser(user.id)
       : this.userService.enableUser(user.id);
     action.subscribe({
-      next: () => this.loadUsers(),
-      error: (err) => console.error('Error toggling user status:', err),
+      next: () => {
+        this.toastService.success(
+          willEnable
+            ? `Utilisateur "${user.username}" activé avec succès`
+            : `Utilisateur "${user.username}" désactivé avec succès`
+        );
+        this.loadUsers();
+      },
+      error: () => this.toastService.error('Erreur lors de la modification du statut'),
     });
   }
 

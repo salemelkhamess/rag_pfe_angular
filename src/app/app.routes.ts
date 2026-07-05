@@ -55,6 +55,7 @@ export const routes: Routes = [
       { path: 'users', loadComponent: () => import('./components/users/user-list/user-list.component').then(m => m.UserListComponent), canActivate: [AdminGuard] },
       { path: 'users/create', loadComponent: () => import('./components/users/user-form/user-form.component').then(m => m.UserFormComponent), canActivate: [AdminGuard] },
       { path: 'users/edit/:id', loadComponent: () => import('./components/users/user-form/user-form.component').then(m => m.UserFormComponent), canActivate: [AdminGuard] },
+      { path: 'audit', loadComponent: () => import('./components/audit/audit-list/audit-list.component').then(m => m.AuditListComponent), canActivate: [AdminGuard] },
     ]
   },
 
